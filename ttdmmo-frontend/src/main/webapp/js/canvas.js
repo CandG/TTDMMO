@@ -41,6 +41,7 @@ demo = {
          map[i] = [];
          }*/
         geoRef = new Firebase('https://erckre9a2fz.firebaseio-demo.com/geodata'),
+                serverRef = new Firebase('https://ttdmmoq.firebaseio-demo.com/fronta'),
                 demo.geo = new MyGeoFire(geoRef);
         // initialize the sheetengine
         canvasElement = document.getElementById('mainCanvas');
@@ -64,7 +65,8 @@ demo = {
             var clickpos = sheetengine.scene.getYardFromPos(pxy);
             console.debug(demo.geo.encode([clickpos.relyardx / demo.max, clickpos.relyardy / demo.max]));
             if (demo.objToInsert != '')
-                geoRef.child('geoFire/dataByHash/' + demo.geo.encode([clickpos.relyardx / demo.max, clickpos.relyardy / demo.max]) + '/xasf').set({x: clickpos.relyardx / demo.max, y: clickpos.relyardy / demo.max, name: "Tesla", color: "#5D7E36", road: demo.objToInsert});
+                serverRef.push({x: 2, y: 2, user_id: "1", type: demo.objToInsert})
+            //              geoRef.child('geoFire/dataByHash/' + demo.geo.encode([clickpos.relyardx / demo.max, clickpos.relyardy / demo.max]) + '/xasf').set({x: clickpos.relyardx / demo.max, y: clickpos.relyardy / demo.max, name: "Tesla", color: "#5D7E36", road: demo.objToInsert});
 
 
         };
