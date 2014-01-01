@@ -37,12 +37,10 @@ demo = {
         demo.max = 10;
         demo.w = 120;
         sheetengine.scene.tilewidth = demo.w;
+        serverRef = new Firebase('https://ttdmmoq.firebaseio-demo.com/fronta');
         /* for (i = -max; i < max; i++) {
          map[i] = [];
          }*/
-        geoRef = new Firebase('https://erckre9a2fz.firebaseio-demo.com/geodata'),
-                serverRef = new Firebase('https://ttdmmoq.firebaseio-demo.com/fronta'),
-                demo.geo = new MyGeoFire(geoRef);
         // initialize the sheetengine
         canvasElement = document.getElementById('mainCanvas');
         canvasElement.onclick = function(event) {
@@ -63,14 +61,20 @@ demo = {
 
             console.debug(pxy);
             var clickpos = sheetengine.scene.getYardFromPos(pxy);
-            console.debug(demo.geo.encode([clickpos.relyardx / demo.max, clickpos.relyardy / demo.max]));
+            console.debug(clickpos.relyardx + ',' + clickpos.relyardy);
             if (demo.objToInsert != '')
-                serverRef.push({x: 2, y: 2, user_id: "1", type: demo.objToInsert})
-            //              geoRef.child('geoFire/dataByHash/' + demo.geo.encode([clickpos.relyardx / demo.max, clickpos.relyardy / demo.max]) + '/xasf').set({x: clickpos.relyardx / demo.max, y: clickpos.relyardy / demo.max, name: "Tesla", color: "#5D7E36", road: demo.objToInsert});
-
+                serverRef.push({x: clickpos.relyardx, y: clickpos.relyardy, user_id: "1", type: demo.objToInsert})
+            /* geoRef.child('geoFire/dataByHash/' + demo.geo.encode([clickpos.relyardx / demo.max, clickpos.relyardy / demo.max]) + '/xasf').set({x: clickpos.relyardx / demo.max, y: clickpos.relyardy / demo.max, name: "Tesla", color: "#5D7E36", road: demo.objToInsert});
+             */
 
         };
         sheetengine.scene.init(canvasElement, {w: 2450, h: 2225});
+
+        demo.firebaseMap = new FirebaseMap();
+        demo.firebaseMap.setLevel(8);
+        sheetengineFieldFactory = new SheetengineFieldFactory(sheetengine);
+        sheetengineFieldFactory.setTileWidth(demo.w);
+        demo.firebaseMap.setFieldFactory(sheetengineFieldFactory);
         demo.sceneReady();
     },
     sceneReady: function() {
@@ -108,7 +112,7 @@ demo = {
         demo.defineUserObj(demo.camera);
         demo.defineBusObj(demo.camera);
         demo.setBoundary(yardpos);
-        demo.loadAndRemoveSheets({x: 0, y: 0, z: 0}, yardpos);
+        demo.firebaseMap.init({x: 0, y: 0, z: 0});
         demo.initControls();
         setInterval(demo.timer2, 80);
     },
@@ -211,120 +215,6 @@ demo = {
         demo.bus = new sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [strecha, bok, bok2, top, bottom], {w: 50, h: 50, relu: 30, relv: 30});
 
     },
-    loadAndRemoveSheets: function(oldcentertile, centertile) {
-        boundary = demo.boundary;
-        map = demo.map;
-        // remove sheets that are far
-        var len = map.length;
-        while (len--) {
-            var sheetinfo = map[len];
-            if (sheetinfo.centerp.x < boundary.xmin || sheetinfo.centerp.x > boundary.xmax || sheetinfo.centerp.y < boundary.ymin || sheetinfo.centerp.y > boundary.ymax) {
-                sheetinfo.sheet.destroy();
-                var index = demo.load.indexOf("x" + sheetinfo.centerp.x + "y" + sheetinfo.centerp.y);
-                if (index > -1) {
-                    demo.load.splice(index, 1);
-
-                }
-                console.log("REM x" + sheetinfo.centerp.x + "y" + sheetinfo.centerp.y);
-                map.splice(len, 1);
-            }
-
-        }
-
-
-
-        //console.log(centertile.x);
-        //
-        // add new sheets
-        demo.geo.getPointsNearLoc([centertile.relyardx / demo.max, centertile.relyardy / demo.max], demo.geo.distRect(demo.radius, demo.max),
-                function(array) {
-                    for (var i = 0; i < array.length; i++) {
-                        var centerp = {x: (array[i].x * demo.max) * demo.w, y: (array[i].y * demo.max) * demo.w, z: 0};
-                        if (-1 == jQuery.inArray("x" + centerp.x + "y" + centerp.y, demo.load)) {
-                            var orientation = {alphaD: 90, betaD: 0, gammaD: 0};
-                            var size = {w: demo.w, h: demo.w};
-                            var color = array[i].color;
-                            var basesheet = new sheetengine.BaseSheet(centerp, orientation, size);
-                            basesheet.color = '' + color;
-                            demo.setYardCanvas(array[i].road, basesheet);
-                            map.push({
-                                centerp: centerp,
-                                sheet: basesheet
-                            });
-                            demo.load.push("x" + centerp.x + "y" + centerp.y);
-                            console.log("INS x" + centerp.x + "y" + centerp.y);
-                        }
-                        console.log("A found point = ", array[i]);
-                    }
-
-                    callback = function(array) {
-                        var len = map.length;
-                        while (len--) {
-                            var sheetinfo = map[len];
-                            sheetinfo.sheet.destroy();
-                            map.splice(len, 1);
-                        }
-
-
-
-                        for (var i = 0; i < array.length; i++) {
-                            var centerp = {x: (array[i].x * demo.max) * demo.w, y: (array[i].y * demo.max) * demo.w, z: 0};
-
-                            var orientation = {alphaD: 90, betaD: 0, gammaD: 0};
-                            var size = {w: demo.w, h: demo.w};
-                            var color = array[i].color;
-                            var basesheet = new sheetengine.BaseSheet(centerp, orientation, size);
-                            basesheet.color = '' + color;
-                            demo.setYardCanvas(array[i].road, basesheet);
-
-                            map.push({
-                                centerp: centerp,
-                                sheet: basesheet
-                            });
-
-                            console.log("REINS x" + centerp.x + "y" + centerp.y);
-
-                            console.log("A found point = ", array[i]);
-                        }
-
-                        sheetengine.calc.calculateAllSheets();
-                        sheetengine.drawing.drawScene(true);
-                    };
-                    demo.geo.offPointsNearLoc([oldcentertile.x / demo.max, oldcentertile.y / demo.max], demo.geo.distRect(demo.radius, demo.max), callback);
-                    demo.geo.onPointsNearLoc([centertile.relyardx / demo.max, centertile.relyardy / demo.max], demo.geo.distRect(demo.radius, demo.max),
-                            callback);
-                    /*   console.log("A found point = " + map.length);
-                     for (var i = 0; i < map.length; i++) {
-                     
-                     var sheetinfo = map[i];
-                     if (sheetinfo.centerp.x < boundary.xmin || sheetinfo.centerp.x > boundary.xmax || sheetinfo.centerp.y < boundary.ymin || sheetinfo.centerp.y > boundary.ymax)
-                     continue;
-                     
-                     if (!sheetinfo.added) {
-                     sheetinfo.sheet = sheetinfo.init();
-                     sheetinfo.added = true;
-                     console.log("A found point = ");
-                     }
-                     }
-                     */
-
-
-
-
-
-
-
-
-                    // translate background
-                    sheetengine.scene.translateBackground(
-                            {x: oldcentertile.x * demo.w, y: oldcentertile.y * demo.w},
-                    {x: centertile.relyardx * demo.w, y: centertile.relyardy * demo.w}
-                    );
-                    sheetengine.calc.calculateAllSheets();
-                    sheetengine.drawing.drawScene(true);
-                });
-        demo.map = map;
-    },
     initControls: function() {
         $(window).keydown(demo.onkeydown);
         $(window).keyup(demo.onkeyup);
@@ -380,7 +270,8 @@ demo = {
 
 
 
-        if (x || y) {
+        if (x || y || sheetengine.dirty) {
+            sheetengine.dirty = 0;
             var yardpos = sheetengine.scene.getYardFromPos(demo.camera);
             var oldcentertile = {x: yardpos.relyardx, y: yardpos.relyardy, z: yardpos.relyardz};
             // move camera
@@ -400,7 +291,13 @@ demo = {
             {
                 //  set new boundary
                 demo.setBoundary(yardpos2);
-                demo.loadAndRemoveSheets(oldcentertile, yardpos2);
+                var newpos = {x: yardpos2.relyardx, y: yardpos2.relyardy};
+                demo.firebaseMap.changePosition(oldcentertile, newpos);
+                // translate background
+                sheetengine.scene.translateBackground(
+                        {x: oldcentertile.x * demo.w, y: oldcentertile.y * demo.w},
+                {x: yardpos2.relyardx * demo.w, y: yardpos2.relyardy * demo.w}
+                );
             }
 
             sheetengine.calc.calculateAllSheets();

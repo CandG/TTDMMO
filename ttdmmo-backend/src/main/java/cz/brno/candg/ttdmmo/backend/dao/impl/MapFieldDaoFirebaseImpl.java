@@ -42,7 +42,7 @@ public class MapFieldDaoFirebaseImpl implements MapFieldDao {
         toSet.put("y", "1");
         toSet.put("type", "r3");
         toSet.put("objects", toSetObj);
-        refMap.child(Integer.toString(entity.getX())).child(Integer.toString(entity.getY())).setValue(toSet);
+        refMap.child(Integer.toString(entity.getX())).child(Integer.toString(entity.getY())).setValue(entity);
         return 0L;
     }
 

@@ -1,6 +1,6 @@
 package cz.brno.candg.ttdmmo.frontend.firebase;
 
-import cz.brno.candg.ttdmmo.backend.firebase.FirebaseReq;
+import cz.brno.candg.ttdmmo.firebase.FirebaseReq;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -8,7 +8,6 @@ import com.firebase.client.FirebaseError;
 import cz.brno.candg.ttdmmo.backend.dao.AuthUserDao;
 import cz.brno.candg.ttdmmo.backend.dao.MapFieldDao;
 import cz.brno.candg.ttdmmo.backend.firebase.listeners.DataToServiceListener;
-import cz.brno.candg.ttdmmo.backend.firebase.listeners.ValueEventListenerWithType;
 import cz.brno.candg.ttdmmo.serviceapi.MapFieldService;
 import javax.inject.Inject;
 
@@ -69,7 +68,9 @@ public class FirebaseServer {
     public void prepareDataToService(final FirebaseReq fbReq) {
         DataToServiceListener dataToServiceListener = new DataToServiceListener();
         dataToServiceListener.setMapFieldService(mapFieldService);
+        dataToServiceListener.setFbReq(fbReq);
         userDao.getMoney(fbReq.getUser_id(), dataToServiceListener);
         mapFieldDao.getXY(fbReq.getX(), fbReq.getY(), dataToServiceListener);
+        System.out.println("req" + fbReq.toString());
     }
 }

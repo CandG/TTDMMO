@@ -56,4 +56,10 @@ public class AuthUserDaoFirebaseImpl implements AuthUserDao {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public void setMoney(int id, int money) {
+        String sid = Long.toString(id);
+        refUsers.child(sid).child("money").setValue(Long.toString(money));
+    }
+
 }

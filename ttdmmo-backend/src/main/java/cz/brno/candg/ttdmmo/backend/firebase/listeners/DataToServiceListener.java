@@ -7,7 +7,7 @@ package cz.brno.candg.ttdmmo.backend.firebase.listeners;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-import cz.brno.candg.ttdmmo.backend.firebase.FirebaseReq;
+import cz.brno.candg.ttdmmo.firebase.FirebaseReq;
 import cz.brno.candg.ttdmmo.model.MapField;
 import cz.brno.candg.ttdmmo.serviceapi.MapFieldService;
 import javax.inject.Inject;
@@ -65,8 +65,8 @@ public class DataToServiceListener extends ValueEventListenerWithType {
         }
 
         if (getMoney() != -1 && getMapField() != null) {
-            //getFbReq()
-            mapFieldService.build(getMoney(), getMapField(), null);
+            System.out.println("req to service" + fbReq.toString());
+            mapFieldService.build(getMoney(), getMapField(), getFbReq());
         }
     }
 

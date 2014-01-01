@@ -10,4 +10,6 @@ import cz.brno.candg.ttdmmo.model.AuthUser;
 public interface AuthUserDao extends Dao<AuthUser> {
 
     void getMoney(int id, ValueEventListenerWithType valueEventListener);
+
+    void setMoney(int id, int money);
 }

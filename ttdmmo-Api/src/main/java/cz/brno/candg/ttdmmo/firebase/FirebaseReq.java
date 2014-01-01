@@ -1,4 +1,4 @@
-package cz.brno.candg.ttdmmo.backend.firebase;
+package cz.brno.candg.ttdmmo.firebase;
 
 /**
  *

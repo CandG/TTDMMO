@@ -5,10 +5,15 @@
             #maincanvas{border:3px solid #DDD;}
             .menuImg {width: 30px;height: 30px;}
         </style>
-        <script src='js/geoFire.js'></script>
-        <script src='js/MyGeoFire.js'></script>
         <script src='https://cdn.firebase.com/v0/firebase.js'></script>
         <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js'></script>
+
+        <!--angular-->
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.min.js"></script>
+        <script src="//cdn.firebase.com/libs/angularfire/0.5.0/angularfire.min.js"></script>
+        <script src="js/controllers.js"></script>
+        <!--angular-->
+
         <link rel="stylesheet" media="screen" href="superfish-master/src/css/superfish.css">
         <link rel="stylesheet" media="screen" href="superfish-master/src/css/superfish-navbar.css">
 
@@ -41,8 +46,9 @@
 
         </script>
     </head>
-    <body>
-        <script src="./js/sheetengine.js"></script>
+    <body>        
+        <script src="./js/sheetengine.js"></script>        
+        <script src='./js/FirebaseMap.js'></script>
         <script src="./js/canvas.js"></script>
 
 
@@ -120,6 +126,17 @@
                     </ul>
                 </li>
             </ul>
+
+            <!--angular-->
+            <div ng-app="userApp" ng-controller="userListCtrl">
+                <h4>{{authUser.name}} ({{authUser.money}})</h4>
+                <ul>
+                    <li ng-repeat="user in users">
+                        <span ng-click="changeFunction(user.user_id)">{{user.name}}</span>
+                    </li>
+                </ul>
+            </div>
+            <!--angular-->
 
             <canvas id="mainCanvas" width="800" height="600" style="cursor:crosshair;border: 3px solid black;">
                 <div style="margin-top:140px;text-align:center;">Your browser does not support HTML 5.</div>
