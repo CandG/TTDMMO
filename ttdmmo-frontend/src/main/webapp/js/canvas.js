@@ -37,7 +37,7 @@ demo = {
         demo.max = 10;
         demo.w = 120;
         sheetengine.scene.tilewidth = demo.w;
-        serverRef = new Firebase('https://ttdmmoq.firebaseio-demo.com/fronta');
+        serverRef = new Firebase('https://ttdmmoq1.firebaseio-demo.com/fronta');
         /* for (i = -max; i < max; i++) {
          map[i] = [];
          }*/
@@ -72,9 +72,7 @@ demo = {
 
         demo.firebaseMap = new FirebaseMap();
         demo.firebaseMap.setLevel(8);
-        sheetengineFieldFactory = new SheetengineFieldFactory(sheetengine);
-        sheetengineFieldFactory.setTileWidth(demo.w);
-        demo.firebaseMap.setFieldFactory(sheetengineFieldFactory);
+        demo.firebaseMap.setFieldFactory(new SheetengineFieldFactory(sheetengine));
         demo.sceneReady();
     },
     sceneReady: function() {
@@ -94,17 +92,17 @@ demo = {
          });
          }
          }*/
-        demo.obj.push({
-            centerp: {x: 0, y: 0, z: 0},
-            orientation: {alphaD: 0, betaD: 0, gammaD: 0},
-            size: {w: 40, h: 40},
-            init: function() {
-                var sheet = new sheetengine.Sheet(this.centerp, this.orientation, this.size);
-                sheet.context.fillStyle = '#FF0000';
-                sheet.context.fillRect(0, 0, 40, 40);
-                return sheet;
-            }
-        });
+        /*  demo.obj.push({
+         centerp: {x: 0, y: 0, z: 0},
+         orientation: {alphaD: 0, betaD: 0, gammaD: 0},
+         size: {w: 40, h: 40},
+         init: function() {
+         var sheet = new sheetengine.Sheet(this.centerp, this.orientation, this.size);
+         sheet.context.fillStyle = '#FF0000';
+         sheet.context.fillRect(0, 0, 40, 40);
+         return sheet;
+         }
+         });*/
         // define camera
         demo.camera = {x: 0, y: 0, z: 0};
         // get relative yard coordinates and set initial boundary for visible yards
@@ -115,6 +113,7 @@ demo = {
         demo.firebaseMap.init({x: 0, y: 0, z: 0});
         demo.initControls();
         setInterval(demo.timer2, 80);
+        setInterval(demo.runBuses, 80);
     },
     setYardCanvas: function(type, basesheet) {
         if (type == 'A')

@@ -16,7 +16,7 @@ public class AuthUserDaoFirebaseImpl implements AuthUserDao {
 
     final static Logger log = LoggerFactory.getLogger(AuthUserDaoFirebaseImpl.class);
 
-    private final Firebase refUsers = new Firebase("https://ttdmmo.firebaseio-demo.com/users");
+    private final Firebase refUsers = new Firebase("https://ttdmmo1.firebaseio-demo.com/users");
 
     private static int cislo = 0;
 

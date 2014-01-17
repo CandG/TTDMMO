@@ -22,7 +22,9 @@ public class MapFieldDaoFirebaseImpl implements MapFieldDao {
 
     final static Logger log = LoggerFactory.getLogger(AuthUserDaoFirebaseImpl.class);
 
-    private final Firebase refMap = new Firebase("https://ttdmmo.firebaseio-demo.com/map");
+    private final Firebase refMap = new Firebase("https://ttdmmo1.firebaseio-demo.com/map");
+
+    private final Firebase refPath = new Firebase("https://ttdmmo1.firebaseio-demo.com/paths");
 
     private static int cislo = 0;
 
@@ -34,22 +36,13 @@ public class MapFieldDaoFirebaseImpl implements MapFieldDao {
 
     @Override
     public Long create(MapField entity) {
-        Map<String, Object> toSet = new HashMap<String, Object>();
-        Map<String, Object> toSetObj = new HashMap<String, Object>();
-        toSetObj.put("bus", "1");
-        toSetObj.put("bus_stop", "1");
-        toSet.put("x", "0");
-        toSet.put("y", "1");
-        toSet.put("type", "r3");
-        toSet.put("objects", toSetObj);
-        refMap.child(Integer.toString(entity.getX())).child(Integer.toString(entity.getY())).setValue(entity);
+        refMap.child(MapField.indexFromXY(entity.getX(), entity.getY())).setValue(entity);
         return 0L;
     }
 
     @Override
     public void getXY(int x, int y, ValueEventListenerWithType valueEventListener) {
-        Firebase childRef = refMap.child(Long.toString(x)).child(Long.toString(y));
-        valueEventListener.setType("mapField");
+        Firebase childRef = refMap.child(MapField.indexFromXY(x, y));
         childRef.addListenerForSingleValueEvent(valueEventListener);
     }
 
@@ -66,6 +59,30 @@ public class MapFieldDaoFirebaseImpl implements MapFieldDao {
     @Override
     public void get(int id, ValueEventListenerWithType valueEventListener) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeBus(int x, int y, String bus_id) {
+        Firebase childRef = refMap.child(MapField.indexFromXY(x, y)).child("obj").child("buses").child(bus_id);
+        childRef.removeValue();
+    }
+
+    @Override
+    public void addBus(int x, int y, String bus_id) {
+        Firebase childRef = refMap.child(MapField.indexFromXY(x, y)).child("obj").child("buses").child(bus_id);
+        childRef.setValue(1);
+    }
+
+    @Override
+    public void getFromPath(String path_id, String path_position, ValueEventListenerWithType valueEventListener) {
+        Firebase childRef = refPath.child(path_id).child(path_position);
+        childRef.addListenerForSingleValueEvent(valueEventListener);
+    }
+
+    @Override
+    public void getByID(String id, ValueEventListenerWithType valueEventListener) {
+        Firebase childRef = refMap.child(id);
+        childRef.addListenerForSingleValueEvent(valueEventListener);
     }
 
 }

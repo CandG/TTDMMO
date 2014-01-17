@@ -1,12 +1,24 @@
-var geoRef = new Firebase('https://ttdmmo.firebaseio-demo.com/map');
+var mapRef = new Firebase('https://ttdmmo1.firebaseio-demo.com/map');
 
 Array.prototype.diff = function(a) {
     return this.filter(function(i) {
         return !(a.indexOf(i) > -1);
     });
 };
-
-
+/*
+ * 
+ * @param {type} x
+ * @param {type} y
+ * @returns {string} separate x and y value 
+ * 
+ */
+function indexFromXY(x, y) {
+    return x + ":" + y;
+}
+function XYFromIndex(index) {
+    var coords = index.split(":");
+    return {x: coords[0], y: coords[1]};
+}
 /**
  * 
  * @param {int} x 
@@ -23,39 +35,131 @@ function generateMap(x, y) {
                 pom = 'A';
             else
                 pom = 'B';
-            geoRef.child(i).child(z).set({x: (i), y: (z), type: pom});
+            mapRef.child(indexFromXY(i, z)).set({x: (i), y: (z), type: pom});
         }
     }
 }
 
+function SheetengineField(basesheet, centerp, type, obj) {
+    console.log('SheetengineField instantiated');
+    var self = this;
+    this.buses = [];
+    this.obj = obj;
+    this.type = type;
+    this.centerp = centerp;
+    this.sheet = basesheet;
+}
+
+
 function SheetengineFieldFactory(sheetengine) {
     console.log('SheetengineFieldFactory instantiated');
     var self = this;
-    this.tileWidth = 100;
     this.color = '#5D7E36';
     this.sheetengine = sheetengine;
+    this.map = null;
+    this.busFactory = null;
+
+    this.loadObjects = function(obj) {
+        if (obj.buses !== undefined) {
+            for (var bus in obj.buses) {
+                //var attr = object[index];
+                console.log('calback bus' + bus);
+                this.busFactory.loadBus(bus);
+            }
+        }
+    };
+    /*
+     * 
+     *  @param {type} field
+     *  @param {boolean} sheet
+     *  @param {boolean} obj
+     *  @param {boolean} all
+     * 
+     * @returns {void}
+     */
+    this.destroyedFieldService = function(field, sheet, obj, all) {
+        //alert('Override this function.');
+        var index = indexFromXY(field.x, field.y);
+        if (this.map[index] !== undefined) {
+            if (this.map[index].sheet !== undefined && sheet) {
+                this.map[index].sheet.destroy();
+                console.log('map sheet is removed ' + field.x + ":" + field.y);
+            }
+            if (obj) {
+                var len = this.map[index].buses.length;
+                while (len--) {
+                    this.map[index].buses[len].sheet.destroy();
+                    this.map[index].buses.splice(len, 1)
+                }
+                console.log('map obj is removed ' + field.x + ":" + field.y);
+            }
+            if (all) {
+                delete this.map[index];
+                console.log('Field is removed ' + field.x + ":" + field.y);
+            }
+
+
+        }
+    };
+    /**
+     * 
+     * @param {snapshot.val()} data 
+     * data from fb
+     * 
+     * @returns {void}
+     */
+    this.loadedFieldService = function(data) {
+        //alert('Override this function.');
+        var index = indexFromXY(data.x, data.y);
+        if (this.map[index] !== undefined) {
+            if (this.map[index].type !== data.type) {
+                this.setFieldCanvas(data.type, this.map[index].sheet);
+                this.map[index].type = data.type;
+            }
+            else {
+                this.destroyedFieldService({x: data.x, y: data.y}, 0, true, 0);
+                if (data.obj !== undefined)
+                    this.loadObjects(data.obj);
+            }
+        }
+        else {
+            var sheetengineField = this.newField(data);
+            this.map[index] = sheetengineField;
+            if (data.obj !== undefined)
+                this.loadObjects(data.obj);
+            console.log('Field is load ' + data.x + ":" + data.y);
+        }
+
+    };
+    this.loadFieldCallback = function(snapshot) {
+        if (snapshot.val() === null) {
+            console.log('Field can be loaded.');
+        } else {
+            self.loadedFieldService(snapshot.val());
+        }
+    };
 }
 SheetengineFieldFactory.prototype = {
     constructor: SheetengineFieldFactory,
-    setTileWidth: function(tileWidth)
+    setBusFactory: function(factory)
     {
-        this.tileWidth = tileWidth;
+        this.busFactory = factory;
+    },
+    setMap: function(map)
+    {
+        this.map = map;
+        this.setBusFactory(new BusFactory(this.sheetengine, this.map))
     },
     newField: function(data)
     {
-        var centerp = {x: (data.x) * this.tileWidth,
-            y: (data.y) * this.tileWidth, z: 0};
-
+        var centerp = {x: (data.x) * this.sheetengine.scene.tilewidth, y: (data.y) * this.sheetengine.scene.tilewidth, z: 0};
         var orientation = {alphaD: 90, betaD: 0, gammaD: 0};
-        var size = {w: this.tileWidth, h: this.tileWidth};
+        var size = {w: this.sheetengine.scene.tilewidth, h: this.sheetengine.scene.tilewidth};
         var color = this.color;
         var basesheet = new this.sheetengine.BaseSheet(centerp, orientation, size);
         basesheet.color = color;
         this.setFieldCanvas(data.type, basesheet);
-        result = {
-            centerp: centerp,
-            sheet: basesheet
-        };
+        result = new SheetengineField(basesheet, centerp, data.type, data.obj);
         this.sheetengine.dirty = 1;
         return result;
     },
@@ -80,39 +184,9 @@ function FirebaseMap() {
     console.log('FirebaseMap instantiated');
     var self = this;
     this.fieldFactory = null;
+    this.cached = 0;
     this.level = 2;
     this.map = [];
-
-    this.destroyedFieldService = function(field) {
-        //alert('Override this function.');
-        if (this.map[field.x + ":" + field.y] !== undefined) {
-            this.map[field.x + ":" + field.y].sheet.destroy();
-            delete this.map[field.x + ":" + field.y];
-            console.log('Field is removed ' + field.x + ":" + field.y);
-        }
-    };
-    /**
-     * 
-     * @param {snapshot.val()} data 
-     * data from fb
-     * 
-     * @returns {object for map field}
-     */
-    this.loadedFieldService = function(data) {
-        //alert('Override this function.');
-        if (this.map[data.x + ":" + data.y] !== undefined)
-            this.destroyedFieldService({x: data.x, y: data.y});
-        var sheetengineField = this.fieldFactory.newField(data);
-        this.map[data.x + ":" + data.y] = sheetengineField;
-        console.log('Field is load ' + data.x + ":" + data.y);
-    };
-    this.loadFieldCallback = function(snapshot) {
-        if (snapshot.val() === null) {
-            console.log('Field can be loaded.');
-        } else {
-            self.loadedFieldService(snapshot.val());
-        }
-    };
 }
 
 FirebaseMap.prototype = {
@@ -125,11 +199,18 @@ FirebaseMap.prototype = {
     setFieldFactory: function(factory)
     {
         this.fieldFactory = factory;
+        this.fieldFactory.setMap(this.map);
     },
     setLevel: function(level)
     {
         this.level = level;
     },
+    /**
+     *  Get fields around a point - isometric rectangle 
+     *  
+     * @param {type {x,y}} centerField
+     * @returns {Array of fields}
+     */
     getFieldsAround: function(centerField)
     {
         var result = [];
@@ -141,6 +222,7 @@ FirebaseMap.prototype = {
             var miniY = centerField.y - pom;
             var maxiY = centerField.y + pom;
             for (u = miniY; u <= maxiY; u++) {
+                //result.push({x: x, y: u}); - kvuli diff indexOf
                 result.push(x + ":" + u);
             }
             if (x < centerField.x) {
@@ -155,29 +237,36 @@ FirebaseMap.prototype = {
     },
     destroyField: function(field)
     {
-        console.log("REM [x" + field.x + ",y" + field.y + "]");
-        geoRef.child(field.x).child(field.y).off('value', this.loadFieldCallback);
-        this.destroyedFieldService(field);
+        var index = indexFromXY(field.x, field.y);
+        if (this.cached === 0) {
+            console.log("REM [x" + field.x + ",y" + field.y + "]");
+            mapRef.child(index).off('value', this.loadFieldCallback);
+            this.fieldFactory.destroyedFieldService(field, true, true, true);
+        }
     },
     destroyFields: function(fields)
     {
         var len = fields.length;
         while (len--) {
-            var coords = fields[len].split(":");
-            this.destroyField({x: coords[0], y: coords[1]});
+            var coords = XYFromIndex(fields[len]);
+            this.destroyField({x: coords.x, y: coords.y});
         }
     },
     loadField: function(field)
     {
+        var index = indexFromXY(field.x, field.y);
         console.log("INS [x" + field.x + ",y" + field.y + "]");
-        geoRef.child(field.x).child(field.y).on('value', this.loadFieldCallback);
+        if (this.cached === 0)
+            mapRef.child(index).on('value', this.fieldFactory.loadFieldCallback);
+        else if (this.map[index] === undefined)
+            mapRef.child(index).on('value', this.fieldFactory.loadFieldCallback);
     },
     loadFields: function(fields)
     {
         var len = fields.length;
         while (len--) {
-            var coords = fields[len].split(":");
-            this.loadField({x: coords[0], y: coords[1]});
+            var coords = XYFromIndex(fields[len]);
+            this.loadField({x: coords.x, y: coords.y});
         }
     },
     changePosition: function(oldCenterField, newCenterField)
@@ -189,7 +278,8 @@ FirebaseMap.prototype = {
         this.loadFields(fieldsToLoad);
         this.destroyFields(fieldsToDestroy);
     }
-};
+}
+;
 
 
 

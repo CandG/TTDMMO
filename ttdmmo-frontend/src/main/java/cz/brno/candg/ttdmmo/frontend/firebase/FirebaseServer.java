@@ -7,7 +7,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import cz.brno.candg.ttdmmo.backend.dao.AuthUserDao;
 import cz.brno.candg.ttdmmo.backend.dao.MapFieldDao;
-import cz.brno.candg.ttdmmo.backend.firebase.listeners.DataToServiceListener;
+import cz.brno.candg.ttdmmo.backend.firebase.listeners.DataToMapFieldServiceListener;
 import cz.brno.candg.ttdmmo.serviceapi.MapFieldService;
 import javax.inject.Inject;
 
@@ -27,7 +27,7 @@ public class FirebaseServer {
     private MapFieldDao mapFieldDao;
 
     // Create a reference to a Firebase location
-    private Firebase refRequests = new Firebase("https://ttdmmoq.firebaseio-demo.com/fronta");
+    private Firebase refRequests = new Firebase("https://ttdmmoq1.firebaseio-demo.com/fronta");
 
     //   private Firebase ref = new Firebase("https://oxv0sz0x1iy.firebaseio-demo.com/");
     //   private Firebase refOut = new Firebase("https://zoqukd20vgy.firebaseio-demo.com/");
@@ -40,7 +40,7 @@ public class FirebaseServer {
         refRequests.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChildName) {
-                final FirebaseReq fbReq = snapshot.getValue(FirebaseReq.class);
+                FirebaseReq fbReq = snapshot.getValue(FirebaseReq.class);
                 refRequests.child(snapshot.getName()).removeValue();
                 prepareDataToService(fbReq);
                 refRequests.removeEventListener(this);
@@ -65,8 +65,8 @@ public class FirebaseServer {
         });
     }
 
-    public void prepareDataToService(final FirebaseReq fbReq) {
-        DataToServiceListener dataToServiceListener = new DataToServiceListener();
+    public void prepareDataToService(FirebaseReq fbReq) {
+        DataToMapFieldServiceListener dataToServiceListener = new DataToMapFieldServiceListener();
         dataToServiceListener.setMapFieldService(mapFieldService);
         dataToServiceListener.setFbReq(fbReq);
         userDao.getMoney(fbReq.getUser_id(), dataToServiceListener);

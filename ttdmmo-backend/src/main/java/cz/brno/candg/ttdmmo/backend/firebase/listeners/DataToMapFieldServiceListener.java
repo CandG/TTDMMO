@@ -16,7 +16,7 @@ import javax.inject.Inject;
  *
  * @author lastuvka
  */
-public class DataToServiceListener extends ValueEventListenerWithType {
+public class DataToMapFieldServiceListener extends ValueEventListenerWithType {
 
     private int money = -1;
     private MapField mapField = null;

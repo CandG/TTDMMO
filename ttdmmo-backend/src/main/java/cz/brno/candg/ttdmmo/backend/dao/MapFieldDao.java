@@ -14,5 +14,13 @@ import cz.brno.candg.ttdmmo.model.MapField;
  */
 public interface MapFieldDao extends Dao<MapField> {
 
+    void getFromPath(String path_id, String path_position, ValueEventListenerWithType valueEventListener);
+
     void getXY(int x, int y, ValueEventListenerWithType valueEventListener);
+
+    void getByID(String id, ValueEventListenerWithType valueEventListener);
+
+    void removeBus(int x, int y, String bus_id);
+
+    void addBus(int x, int y, String bus_id);
 }

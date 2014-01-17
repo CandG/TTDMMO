@@ -1,5 +1,8 @@
 package cz.brno.candg.ttdmmo.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author lastuvka
@@ -9,7 +12,7 @@ public class MapField {
     private String type;
     private int x;
     private int y;
-    private Object objects;
+    private Object obj;
 
     public MapField() {
     }
@@ -30,8 +33,23 @@ public class MapField {
         return y;
     }
 
-    public Object getObjects() {
-        return objects;
+    public Object getObj() {
+        return obj;
+    }
+
+    public void setObj(Object obj) {
+        this.obj = obj;
+    }
+
+    public static String indexFromXY(int x, int y) {
+        return x + ":" + y;
+    }
+
+    public static Map<String, Object> MapFromXY(int x, int y) {
+        Map<String, Object> updates = new HashMap<String, Object>();
+        updates.put("x", x);
+        updates.put("y", y);
+        return updates;
     }
 
     @Override
@@ -62,7 +80,7 @@ public class MapField {
 
     @Override
     public String toString() {
-        return "MapField{" + "type=" + type + ", x=" + x + ", y=" + y + ", objects=" + objects + '}';
+        return "MapField{" + "type=" + type + ", x=" + x + ", y=" + y + ", objects=" + obj + '}';
     }
 
 }

@@ -1,5 +1,6 @@
 package cz.brno.candg.ttdmmo.frontend;
 
+import cz.brno.candg.ttdmmo.frontend.firebase.BusController;
 import cz.brno.candg.ttdmmo.frontend.firebase.FirebaseServer;
 import cz.brno.candg.ttdmmo.serviceapi.UserService;
 import java.io.IOException;
@@ -23,6 +24,9 @@ public class MainServlet extends HttpServlet {
 
     @Inject
     FirebaseServer fs;
+
+    @Inject
+    BusController bc;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
