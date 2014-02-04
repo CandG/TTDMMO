@@ -52,12 +52,12 @@ public class MapFieldDaoFirebaseImpl implements MapFieldDao {
     }
 
     @Override
-    public void remove(int id) {
+    public void remove(String id) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void get(int id, ValueEventListenerWithType valueEventListener) {
+    public void get(String id, ValueEventListenerWithType valueEventListener) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

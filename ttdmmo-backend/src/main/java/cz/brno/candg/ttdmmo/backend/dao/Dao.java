@@ -20,7 +20,7 @@ public interface Dao<T> {
     /*  Get the data to the valueEventListener
      * @throws IllegalArgumentException if parameter is null or invalid
      */
-    void get(int id, ValueEventListenerWithType valueEventListener);
+    void get(String id, ValueEventListenerWithType valueEventListener);
 
     /* Update the entity
      * @throws IllegalArgumentException if parameter is null, invalid or non-existent in the DB
@@ -31,5 +31,5 @@ public interface Dao<T> {
      * @throws IllegalArgumentException if parameter is null or invalid. Does not throw this exception if
      * parameter is valid but given entity is nonexistent. 
      */
-    void remove(int id);
+    void remove(String id);
 }

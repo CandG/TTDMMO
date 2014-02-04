@@ -32,16 +32,14 @@ public class AuthUserDaoFirebaseImpl implements AuthUserDao {
     }
 
     @Override
-    public void get(int id, ValueEventListenerWithType valueEventListener) {
-        String sid = Long.toString(id);
-        Firebase childRef = refUsers.child(sid);
+    public void get(String id, ValueEventListenerWithType valueEventListener) {
+        Firebase childRef = refUsers.child(id);
         childRef.addListenerForSingleValueEvent(valueEventListener);
     }
 
     @Override
-    public void getMoney(int id, ValueEventListenerWithType valueEventListener) {
-        String sid = Long.toString(id);
-        Firebase childRef = refUsers.child(sid).child("money");
+    public void getMoney(String id, ValueEventListenerWithType valueEventListener) {
+        Firebase childRef = refUsers.child(id).child("money");
         valueEventListener.setType("money");
         childRef.addListenerForSingleValueEvent(valueEventListener);
     }
@@ -52,14 +50,19 @@ public class AuthUserDaoFirebaseImpl implements AuthUserDao {
     }
 
     @Override
-    public void remove(int id) {
+    public void remove(String id) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void setMoney(int id, int money) {
-        String sid = Long.toString(id);
-        refUsers.child(sid).child("money").setValue(Long.toString(money));
+    public void setMoney(String id, int money) {
+        refUsers.child(id).child("money").setValue(Long.toString(money));
+    }
+
+    @Override
+    public void addBus(String id, String bus_id) {
+        Firebase childRef = refUsers.child(id).child("buses").child(bus_id);
+        childRef.setValue(true);
     }
 
 }

@@ -8,7 +8,7 @@ package cz.brno.candg.ttdmmo.backend.service.impl;
 import com.firebase.client.Firebase;
 import cz.brno.candg.ttdmmo.backend.dao.AuthUserDao;
 import cz.brno.candg.ttdmmo.backend.dao.MapFieldDao;
-import cz.brno.candg.ttdmmo.firebase.FirebaseReq;
+import cz.brno.candg.ttdmmo.firebase.FBMapReq;
 import cz.brno.candg.ttdmmo.model.MapField;
 import cz.brno.candg.ttdmmo.serviceapi.MapFieldService;
 import cz.brno.candg.ttdmmo.serviceapi.dto.AuthUserDto;
@@ -42,7 +42,7 @@ public class MapFieldServiceImpl implements MapFieldService {
     }
 
     @Override
-    public void build(int money, MapField mapField, FirebaseReq firebaseReq) {
+    public void build(int money, MapField mapField, FBMapReq firebaseReq) {
         if (money > 0 && (mapField.getType().equals("B") || firebaseReq.getType().equals("B"))) {
             authUserDao.setMoney(firebaseReq.getUser_id(), money - 10);
             mapField.setType(firebaseReq.getType());

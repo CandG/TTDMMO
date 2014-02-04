@@ -18,8 +18,10 @@ public class Bus {
     private int x;
     private int y;
     private int direction;
-    private int user_id;
+    private int cargo;
+    private String user_id;
     private String bus_id;
+    private String name;
     private String path_id;
     private String nextField;
     private int path_position;
@@ -28,6 +30,22 @@ public class Bus {
     private List<Long> bus_stops = new ArrayList<Long>();
 
     public Bus() {
+    }
+
+    public int getCargo() {
+        return cargo;
+    }
+
+    public void setCargo(int cargo) {
+        this.cargo = cargo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getNextField() {
@@ -78,11 +96,11 @@ public class Bus {
         this.direction = direction;
     }
 
-    public int getUser_id() {
+    public String getUser_id() {
         return user_id;
     }
 
-    public void setUser_id(int user_id) {
+    public void setUser_id(String user_id) {
         this.user_id = user_id;
     }
 
@@ -142,7 +160,7 @@ public class Bus {
 
     @Override
     public String toString() {
-        return "Bus{" + "x=" + x + ", y=" + y + ", user_id=" + user_id + ", bus_id=" + bus_id + ", position=" + position + ", startTime=" + startTime + ", bus_stops=" + bus_stops + '}';
+        return "Bus{" + "x=" + x + ", y=" + y + ", direction=" + direction + ", user_id=" + user_id + ", bus_id=" + bus_id + ", name=" + name + ", path_id=" + path_id + ", nextField=" + nextField + ", path_position=" + path_position + ", position=" + position + ", startTime=" + startTime + ", bus_stops=" + bus_stops + '}';
     }
 
 }

@@ -7,10 +7,9 @@ package cz.brno.candg.ttdmmo.backend.firebase.listeners;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-import cz.brno.candg.ttdmmo.firebase.FirebaseReq;
+import cz.brno.candg.ttdmmo.firebase.FBMapReq;
 import cz.brno.candg.ttdmmo.model.MapField;
 import cz.brno.candg.ttdmmo.serviceapi.MapFieldService;
-import javax.inject.Inject;
 
 /**
  *
@@ -20,7 +19,7 @@ public class DataToMapFieldServiceListener extends ValueEventListenerWithType {
 
     private int money = -1;
     private MapField mapField = null;
-    private FirebaseReq fbReq;
+    private FBMapReq fbReq;
     private MapFieldService mapFieldService;
 
     public MapFieldService getMapFieldService() {
@@ -31,11 +30,11 @@ public class DataToMapFieldServiceListener extends ValueEventListenerWithType {
         this.mapFieldService = mapFieldService;
     }
 
-    public FirebaseReq getFbReq() {
+    public FBMapReq getFbReq() {
         return fbReq;
     }
 
-    public void setFbReq(FirebaseReq fbReq) {
+    public void setFbReq(FBMapReq fbReq) {
         this.fbReq = fbReq;
     }
 

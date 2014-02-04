@@ -1,10 +1,6 @@
 package cz.brno.candg.ttdmmo.backend.service.impl;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import cz.brno.candg.ttdmmo.backend.dao.AuthUserDao;
-import cz.brno.candg.ttdmmo.backend.dto.convert.AuthUserConvert;
 import cz.brno.candg.ttdmmo.serviceapi.UserService;
 import cz.brno.candg.ttdmmo.serviceapi.dto.AuthUserDto;
 import javax.inject.Inject;

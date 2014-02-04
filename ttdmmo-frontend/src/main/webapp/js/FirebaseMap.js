@@ -40,7 +40,7 @@ function generateMap(x, y) {
     }
 }
 
-function SheetengineField(basesheet, centerp, type, obj) {
+function SheetengineField(basesheet, centerp, type, obj, building) {
     console.log('SheetengineField instantiated');
     var self = this;
     this.buses = [];
@@ -48,6 +48,7 @@ function SheetengineField(basesheet, centerp, type, obj) {
     this.type = type;
     this.centerp = centerp;
     this.sheet = basesheet;
+    this.building = building;
 }
 
 
@@ -58,6 +59,7 @@ function SheetengineFieldFactory(sheetengine) {
     this.sheetengine = sheetengine;
     this.map = null;
     this.busFactory = null;
+    this.buildingFactory = null;
 
     this.loadObjects = function(obj) {
         if (obj.buses !== undefined) {
@@ -145,21 +147,27 @@ SheetengineFieldFactory.prototype = {
     {
         this.busFactory = factory;
     },
+    setBuildingFactory: function(factory)
+    {
+        this.buildingFactory = factory;
+    },
     setMap: function(map)
     {
         this.map = map;
-        this.setBusFactory(new BusFactory(this.sheetengine, this.map))
+        this.setBusFactory(new BusFactory(this.sheetengine, this.map));
+        this.setBuildingFactory(new BuildingFactory(this.sheetengine, this.map));
     },
     newField: function(data)
     {
         var centerp = {x: (data.x) * this.sheetengine.scene.tilewidth, y: (data.y) * this.sheetengine.scene.tilewidth, z: 0};
-        var orientation = {alphaD: 90, betaD: 0, gammaD: 0};
+        var orientation = {alphaD: 270, betaD: 0, gammaD: 0};
         var size = {w: this.sheetengine.scene.tilewidth, h: this.sheetengine.scene.tilewidth};
         var color = this.color;
         var basesheet = new this.sheetengine.BaseSheet(centerp, orientation, size);
         basesheet.color = color;
         this.setFieldCanvas(data.type, basesheet);
-        result = new SheetengineField(basesheet, centerp, data.type, data.obj);
+        var building = this.setFieldBuilding(data.type, centerp);
+        result = new SheetengineField(basesheet, centerp, data.type, data.obj, building);
         this.sheetengine.dirty = 1;
         return result;
     },
@@ -170,12 +178,32 @@ SheetengineFieldFactory.prototype = {
             basesheet.img = imgRoad2;
         else if (type == 'A3')
             basesheet.img = imgCross;
-        else if (type == 'Q')
+        else if (type == 'B1' || type == 'B3')
             basesheet.img = imgDepo;
         else if (type == 'W')
             basesheet.img = imgZas;
+        else if (type == 'BF')
+            basesheet.img = imgFarm;
         else
             basesheet.img = imgGrass;
+    },
+    setFieldBuilding: function(type, centerp) {
+        if (type == 'B0')
+            return this.buildingFactory.newTownCenter(centerp);
+        else if (type == 'B1') {
+            return this.buildingFactory.newDepo(centerp);
+        }
+        else if (type == 'B2') {
+            return this.buildingFactory.newHouse(centerp);
+        }
+        else if (type == 'B3') {
+            return this.buildingFactory.newWarehouse(centerp);
+        }
+        else if (type == 'BF') {
+            return this.buildingFactory.newFarm(centerp);
+        }
+        else
+            return null;
     }
 };
 

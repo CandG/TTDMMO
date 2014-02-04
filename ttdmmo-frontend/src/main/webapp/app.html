@@ -1,147 +1,189 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" ng-app="userApp" >
     <head>
-        <style>   
-            #maincanvas{border:3px solid #DDD;}
-            .menuImg {width: 30px;height: 30px;}
-        </style>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>MMOTTD</title>
+
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+        <link href="css/starter-template.css" rel="stylesheet">
+        <link href="css/animation.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+    </head>
+
+    <body ng-controller="userListCtrl">
+
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">MMOTTD</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                    <p class="navbar-text navbar-right">{{authUser.name}} ({{authUser.money}})</p>
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
+
+
+
+
+        <canvas id="mainCanvas" ng-click="checkCanvasClick($event)" width="800" height="600" style="cursor:crosshair;border: 3px solid black;">
+            <div style="margin-top:140px;text-align:center;">Your browser does not support HTML 5.</div>
+        </canvas>
+
+        <div style="float:right"> 
+            <div class="panel panel-primary">
+                <!-- Default panel contents -->
+                <div class="panel-heading">Built {{built}}</div>
+                <div class="btn-toolbar" role="toolbar">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default"> <img src="images/built/imgRoad.jpg" ng-click="setBuilt('A')"  /> </button>
+                        <button type="button" class="btn btn-default"> <img src="images/built/imgRoad2.jpg" ng-click="setBuilt('A2')"  /> </button>
+                        <button type="button" class="btn btn-default"> <img src="images/built/imgCross.jpg" ng-click="setBuilt('A3')"  /> </button>
+                        <button type="button" class="btn btn-default"> <img src="images/built/imgGrass.jpg" ng-click="setBuilt('B')"  /> </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!--angular-->
+            <div class="panel panel-primary">                               
+                <!-- Default panel contents -->
+                <div class="panel-heading">Vehicles</div>
+                <div class="animate-switch-container"
+                     ng-switch on="vehicle.selection">
+                    <div class="animate-switch" ng-switch-when="1">
+                        <form name="myForm">
+                            <div class="control-group" ng-class="{error: myForm.name.$invalid}">
+                                <label>Name</label>
+                                <input type="text" name="name" ng-model="vehicle.name" required>
+                                <span ng-show="myForm.name.$error.required" class="help-inline">
+                                    Required</span>
+                            </div>
+                            <button ng-click="vehicle.selection = 0" type="button" class="btn btn-default">
+                                Cancel
+                            </button>
+
+                            <button ng-click="newVehicle(vehicle.name)" ng-disabled="myForm.$invalid"
+                                    class="btn btn-primary">Save</button>
+                        </form>
+                    </div>
+                    <div class="animate-switch" ng-switch-when="2">
+                        Click on map - to set vehicle stop.
+                        <form name="changeVehicleForm">
+                            <div class="control-group" ng-class="{error: myForm.name.$invalid}">
+                                <label>Stop</label>
+                                <input type="text" name="name" readonly ng-model="stops.name" required>
+                                <span ng-show="changeVehicleForm.name.$error.required" class="help-inline">
+                                    Required</span>
+                            </div>
+                            <button ng-click="vehicle.selection = 0" type="button" class="btn btn-default">
+                                Cancel
+                            </button>
+
+                            <button ng-click="setPath(stops.name)" ng-disabled="changeVehicleForm.$invalid"
+                                    class="btn btn-primary">Save</button>
+                        </form>
+                    </div>
+                    <div class="animate-switch" ng-switch-default>
+                        <!-- Table -->
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>name</th>
+                                    <th>path_position</th>
+                                    <th>cargo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="userBus in userBuses">
+                                    <td>{{userBus.name}}</td>
+                                    <td>{{userBus.path_position}}</td>
+                                    <td>{{userBus.cargo}}</td>
+                                    <td>
+                                        <a href="#" ng-click="newPath(userBus.bus_id)">Change</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="panel-body">
+                            <!-- Button trigger modal -->
+                            <button ng-click="vehicle.selection = 1" type="button" class="btn btn-primary">
+                                New vehicle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-primary">
+                <!-- Default panel contents -->
+                <div class="panel-heading">Users</div>
+
+                <!-- Table -->
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>First Name</th>
+                            <th>Money</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="user in users">
+                            <td ng-click="changeFunction(user.user_id)">{{user.user_id}}</td>
+                            <td>{{user.name}}</td>
+                            <td>{{user.money}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <!--angular-->
+
+
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
         <script src='https://cdn.firebase.com/v0/firebase.js'></script>
-        <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js'></script>
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 
         <!--angular-->
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.min.js"></script>
-        <script src="//cdn.firebase.com/libs/angularfire/0.5.0/angularfire.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.min.js"></script>
+        <script src="http://code.angularjs.org/1.2.9/angular-animate.min.js"></script>
+        <script src = "https://cdn.firebase.com/libs/angularfire/0.5.0/angularfire.min.js"></script>
         <script src="js/controllers.js"></script>
         <!--angular-->
 
-        <link rel="stylesheet" media="screen" href="superfish-master/src/css/superfish.css">
-        <link rel="stylesheet" media="screen" href="superfish-master/src/css/superfish-navbar.css">
 
-        <script src="superfish-master/src/js/hoverIntent.js"></script>
-        <script src="superfish-master/src/js/superfish.js"></script>
-        <script>
-
-            jQuery(document).ready(function() {
-                jQuery('ul.sf-menu').superfish({
-                    pathClass: 'current'
-                });
-
-
-                $('.menuImg').click(function() {
-
-                    var btn = $(this);
-
-
-                    demo.objToInsert = btn.data('obj-type');
-                    // this line just for testing
-                    console.debug(btn.data('obj-type'));
-                    /* switch (btn.data('obj-type')) {
-                     case 'A' :
-                     demo.objToInsert = jQuery.data(div, "blah");
-                     break;
-                     }*/
-                });
-
-            });
-
-        </script>
-    </head>
-    <body>        
-        <script src="./js/sheetengine.js"></script>     
+        <script src="./js/sheetengine.js"></script>    
+        <script src='./js/Building.js'></script>
         <script src='./js/Bus.js'></script>
         <script src='./js/FirebaseMap.js'></script>
         <script src="./js/canvas.js"></script>
-
-
-        <div id="obal" style="width:800px;margin:0 auto;">
-            <ul id="sample-menu-4" class="sf-menu sf-navbar">
-                <li class="current">
-                    <a href="#">Roads</a>
-                    <ul>
-                        <li><img src="images/field/imgRoad.jpg" class="menuImg" data-obj-type="A" /></li>
-                        <li><img src="images/field/imgRoad2.jpg" class="menuImg" data-obj-type="A2" /></li>
-                        <li><img src="images/field/imgCross.jpg" class="menuImg" data-obj-type="A3" /></li>
-                        <li><img src="images/field/imgDepo.jpg" class="menuImg" data-obj-type="Q" /></li>
-                        <li><img src="images/field/imgZas.jpg" class="menuImg" data-obj-type="W" /></li>
-                        <li><img src="images/field/imgGrass.jpg" class="menuImg" data-obj-type="B" /></li>
-                    </ul>
-                </li>
-                <li >
-                    <a href="#">menu item</a>
-                    <ul>
-                        <li>
-                            <a href="#">subitem 2a</a>
-                            <ul>
-                                <li><a href="#">menu item</a></li>
-                                <li><a href="#aba">menu item</a></li>
-                                <li><a href="#abb">menu item</a></li>
-                                <li><a href="#abc">menu item</a></li>
-                                <li><a href="#abd">menu item</a></li>
-                            </ul>
-                        </li>
-                        <li class="current">
-                            <a href="#">path to current</a>
-                            <ul>
-                                <li><a href="#">menu item</a></li>
-                                <li><a href="#aba">menu item</a></li>
-                                <li><a href="#abb">menu item</a></li>
-                                <li class="current"><a href="#abc">current page</a></li>
-                                <li><a href="#abd">menu item</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#">subitem 2c</a>
-                            <ul>
-                                <li><a href="#">menu item</a></li>
-                                <li><a href="#aba">menu item</a></li>
-                                <li><a href="#abb">menu item</a></li>
-                                <li><a href="#abc">menu item</a></li>
-                                <li><a href="#abd">menu item</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">subitem 2d</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">menu item</a>
-                    <ul>
-                        <li><a href="#">if no subitems, duplicate parent item href and use this as descriptive label</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">menu item</a>
-                    <ul>
-                        <li><a href="#">subitem 4a</a></li>
-                        <li><a href="#">subitem 4b</a></li>
-                        <li><a href="#">subitem 4c</a></li>
-                        <li><a href="#">subitem 4d</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">menu item</a>
-                    <ul>
-                        <li><a href="#">subitem 5a</a></li>
-                        <li><a href="#">subitem 5b</a></li>
-                        <li><a href="#">subitem 5c</a></li>
-                        <li><a href="#">subitem 5d</a></li>
-                    </ul>
-                </li>
-            </ul>
-
-            <!--angular-->
-            <div ng-app="userApp" ng-controller="userListCtrl">
-                <h4>{{authUser.name}} ({{authUser.money}})</h4>
-                <ul>
-                    <li ng-repeat="user in users">
-                        <span ng-click="changeFunction(user.user_id)">{{user.name}}</span>
-                    </li>
-                </ul>
-            </div>
-            <!--angular-->
-
-            <canvas id="mainCanvas" width="800" height="600" style="cursor:crosshair;border: 3px solid black;">
-                <div style="margin-top:140px;text-align:center;">Your browser does not support HTML 5.</div>
-            </canvas>
-        </div>
     </body>
 </html>
+

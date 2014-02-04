@@ -15,8 +15,8 @@ imgDepo.src = pathImages + 'imgDepo.jpg';
 
 imgRoad.src = pathImages + 'imgRoad.jpg';
 imgGrass.src = pathImages + 'imgGrass.jpg';
-
-
+var imgFarm = new Image();
+imgFarm.src = pathImages + 'imgFarm.jpg';
 
 demo = {
     maxsteps: 70,
@@ -37,37 +37,13 @@ demo = {
         demo.max = 10;
         demo.w = 120;
         sheetengine.scene.tilewidth = demo.w;
-        serverRef = new Firebase('https://ttdmmoq1.firebaseio-demo.com/fronta');
+
         /* for (i = -max; i < max; i++) {
          map[i] = [];
          }*/
         // initialize the sheetengine
         canvasElement = document.getElementById('mainCanvas');
-        canvasElement.onclick = function(event) {
-            var puv = {
-                u: event.clientX - sheetengine.canvas.offsetLeft + pageXOffset,
-                v: event.clientY - sheetengine.canvas.offsetTop + pageYOffset
-            };
 
-            var w = sheetengine.canvas.width / 2;
-            var h = sheetengine.canvas.height / 2;
-            puv.u = (puv.u - w) / demo.zoom + w;
-            puv.v = (puv.v - h) / demo.zoom + h;
-
-            var pxy = sheetengine.transforms.inverseTransformPoint({
-                u: puv.u + sheetengine.scene.center.u,
-                v: puv.v + sheetengine.scene.center.v
-            });
-
-            console.debug(pxy);
-            var clickpos = sheetengine.scene.getYardFromPos(pxy);
-            console.debug(clickpos.relyardx + ',' + clickpos.relyardy);
-            if (demo.objToInsert != '')
-                serverRef.push({x: clickpos.relyardx, y: clickpos.relyardy, user_id: "1", type: demo.objToInsert})
-            /* geoRef.child('geoFire/dataByHash/' + demo.geo.encode([clickpos.relyardx / demo.max, clickpos.relyardy / demo.max]) + '/xasf').set({x: clickpos.relyardx / demo.max, y: clickpos.relyardy / demo.max, name: "Tesla", color: "#5D7E36", road: demo.objToInsert});
-             */
-
-        };
         sheetengine.scene.init(canvasElement, {w: 2450, h: 2225});
 
         demo.firebaseMap = new FirebaseMap();
@@ -107,13 +83,16 @@ demo = {
         demo.camera = {x: 0, y: 0, z: 0};
         // get relative yard coordinates and set initial boundary for visible yards
         var yardpos = sheetengine.scene.getYardFromPos(demo.camera);
-        demo.defineUserObj(demo.camera);
-        demo.defineBusObj(demo.camera);
+        demo.defineUserObj({x: 20, y: 100, z: 0});
+        //demo.defineBusObj(demo.camera);
+        /*    demo.defineBuildingObj({x: 100, y: 100, z: 0});
+         demo.defineBuildingObj({x: -100, y: 100, z: 0});
+         demo.defineBuildingObj({x: -200, y: 100, z: 0});*/
         demo.setBoundary(yardpos);
         demo.firebaseMap.init({x: 0, y: 0, z: 0});
         demo.initControls();
-        setInterval(demo.timer2, 80);
-        setInterval(demo.runBuses, 80);
+        //setInterval(demo.timer2, 80);
+        //setInterval(demo.runBuses, 80);
     },
     setYardCanvas: function(type, basesheet) {
         if (type == 'A')
@@ -214,6 +193,61 @@ demo = {
         demo.bus = new sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [strecha, bok, bok2, top, bottom], {w: 50, h: 50, relu: 30, relv: 30});
 
     },
+    defineBuildingObj: function(centerp) {
+        // user definition for animation with sheet motion
+        var bok = new sheetengine.Sheet({x: 0, y: 0, z: 0}, {alphaD: 0, betaD: 0, gammaD: 0}, {w: 50, h: 20});
+        var ctx = bok.context;
+        // head
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 50, 20);
+        //okna
+        ctx.fillStyle = '#0000dd';
+        ctx.fillRect(10, 3, 10, 10);
+        ctx.fillStyle = '#0000dd';
+        ctx.fillRect(30, 3, 10, 10);
+
+        var bok2 = new sheetengine.Sheet({x: 0, y: 50, z: 0}, {alphaD: 0, betaD: 0, gammaD: 0}, {w: 50, h: 20});
+        var ctx2 = bok2.context;
+        // body
+        ctx2.fillStyle = '#ffffff';
+        ctx2.fillRect(0, 0, 50, 20);
+        ctx2.fillStyle = '#0000dd';
+        ctx2.fillRect(10, 3, 10, 10);
+        ctx2.fillStyle = '#0000dd';
+        ctx2.fillRect(30, 3, 10, 10);
+
+        var top = new sheetengine.Sheet({x: -25, y: 25, z: 0}, {alphaD: 0, betaD: 0, gammaD: 90}, {w: 50, h: 20});
+        var ctx4 = top.context;
+        // head
+        ctx4.fillStyle = '#ffffff';
+        ctx4.fillRect(0, 0, 50, 20);
+        ctx4.fillStyle = '#0000dd';
+        ctx4.fillRect(1, 2, 5, 5);
+
+        var strecha = new sheetengine.Sheet({x: 0, y: 25, z: 10}, {alphaD: 90, betaD: 0, gammaD: 0}, {w: 50, h: 50});
+        var ctx5 = strecha.context;
+        // head
+        ctx5.fillStyle = '#7F1717';
+        ctx5.fillRect(0, 0, 50, 50);
+
+        var bottom = new sheetengine.Sheet({x: 25, y: 25, z: 0}, {alphaD: 0, betaD: 0, gammaD: 90}, {w: 50, h: 20});
+        var ctx3 = bottom.context;
+        // head
+        ctx3.fillStyle = '#ffffff';
+        ctx3.fillRect(0, 0, 50, 20);
+        ctx3.fillStyle = '#0000dd';
+        ctx3.fillRect(10, 3, 10, 10);
+        ctx3.fillStyle = '#0000dd';
+        ctx3.fillRect(30, 3, 10, 10);
+
+
+
+
+
+        // define user object
+        demo.building = new sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [strecha, bok, bok2, top, bottom], {w: 100, h: 80, relu: 50, relv: 50});
+
+    },
     initControls: function() {
         $(window).keydown(demo.onkeydown);
         $(window).keyup(demo.onkeyup);
@@ -247,26 +281,22 @@ demo = {
     },
     onkeyup: function(event) {
         demo.setKeys(event, 0);
-    },
-    timer: function() {
+    }, timer: function() {
         var move = 10;
         x = 0;
         y = 0;
         if (demo.keys.u) {
             x = -move;
         }
-
         if (demo.keys.d) {
             x = move;
         }
-
         if (demo.keys.r) {
             y = -move;
         }
         if (demo.keys.l) {
             y = +move;
         }
-
 
 
         if (x || y || sheetengine.dirty) {
@@ -360,7 +390,6 @@ demo = {
         var sceneChanged = 1;
         obj = demo.bus;
 
-
         if (demo.rotate) {
             obj.rotate({x: 0, y: 0, z: 1}, Math.PI / 2 / (demo.maxsteps / 10));
             if (++demo.steps >= demo.maxsteps / 10) {
@@ -390,7 +419,6 @@ demo = {
                 demo.rotate = true;
             }
         }
-
 
         if (sceneChanged) {
             sheetengine.calc.calculateChangedSheets();
