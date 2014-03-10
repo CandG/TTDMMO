@@ -14,6 +14,19 @@ import java.util.List;
  */
 public class Path {
 
-    private List<MapField> path = new ArrayList<MapField>();
+    private List<String> path = new ArrayList<String>();
+
+    public List<String> getPath() {
+        return path;
+    }
+
+    public void setPath(List<String> path) {
+        this.path = path;
+    }
+
+    @Override
+    public String toString() {
+        return "Path{" + "path=" + path + '}';
+    }
 
 }

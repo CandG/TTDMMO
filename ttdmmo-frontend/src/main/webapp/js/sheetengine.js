@@ -13,7 +13,7 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var sheetengine = (function() {
+var helpsheetengine = function() {
     var sheetengine = {
         sheets: [],
         basesheets: [],
@@ -3751,8 +3751,10 @@ var sheetengine = (function() {
     shadows.shadowBaseMatrixInverse = geometry.getBaseMatrixInverse(shadows.lightSourcep1, shadows.lightSourcep2, shadows.lightSource);
 
     return sheetengine;
-})();
+};
 
+var sheetengine = (helpsheetengine)();
+var sheetengine2 = (helpsheetengine)();
 
 // set exports for node.js
 if (typeof (exports) !== 'undefined' && exports !== null) {

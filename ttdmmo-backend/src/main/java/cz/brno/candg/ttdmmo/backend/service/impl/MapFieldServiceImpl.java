@@ -5,16 +5,15 @@
  */
 package cz.brno.candg.ttdmmo.backend.service.impl;
 
-import com.firebase.client.Firebase;
 import cz.brno.candg.ttdmmo.backend.dao.AuthUserDao;
 import cz.brno.candg.ttdmmo.backend.dao.MapFieldDao;
-import cz.brno.candg.ttdmmo.firebase.FBMapReq;
+import cz.brno.candg.ttdmmo.backend.dao.MessageDao;
+import cz.brno.candg.ttdmmo.backend.firebase.FbServerTime;
+import cz.brno.candg.ttdmmo.firebase.FbMapReq;
 import cz.brno.candg.ttdmmo.model.MapField;
+import cz.brno.candg.ttdmmo.model.Message;
 import cz.brno.candg.ttdmmo.serviceapi.MapFieldService;
-import cz.brno.candg.ttdmmo.serviceapi.dto.AuthUserDto;
 import cz.brno.candg.ttdmmo.serviceapi.dto.MapFieldDto;
-import java.util.HashMap;
-import java.util.Map;
 import javax.inject.Inject;
 
 /**
@@ -24,7 +23,13 @@ import javax.inject.Inject;
 public class MapFieldServiceImpl implements MapFieldService {
 
     @Inject
+    FbServerTime serverTime;
+
+    @Inject
     private MapFieldDao mapFieldDao;
+
+    @Inject
+    private MessageDao messageDao;
 
     @Inject
     private AuthUserDao authUserDao;
@@ -42,13 +47,21 @@ public class MapFieldServiceImpl implements MapFieldService {
     }
 
     @Override
-    public void build(int money, MapField mapField, FBMapReq firebaseReq) {
-        if (money > 0 && (mapField.getType().equals("B") || firebaseReq.getType().equals("B"))) {
-            authUserDao.setMoney(firebaseReq.getUser_id(), money - 10);
+    public void build(int money, MapField mapField, FbMapReq firebaseReq) {
+        if (money > 0 && (mapField.getType().equals("B") || (isRoad(mapField.getType()) && firebaseReq.getType().equals("B")))) {
+            authUserDao.setMoney(firebaseReq.getUser_id(), -100);
             mapField.setType(firebaseReq.getType());
             mapFieldDao.create(mapField);
+        } else {
+            Message message = new Message();
+            message.setText("The operation can not be done!");
+            message.setUser_id(firebaseReq.getUser_id());
+            message.setXy(firebaseReq.getXy());
+            messageDao.create(message);
         }
-
     }
 
+    public boolean isRoad(String type) {
+        return type.equals("A") || type.equals("A2") || type.equals("A3");
+    }
 }

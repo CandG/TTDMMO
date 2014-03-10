@@ -5,10 +5,15 @@
  */
 package cz.brno.candg.ttdmmo.backend.dao;
 
+import cz.brno.candg.ttdmmo.backend.firebase.listeners.ValueEventListenerWithType;
+import cz.brno.candg.ttdmmo.model.Path;
+
 /**
  *
  * @author lastuvka
  */
-public interface PathDao extends Dao<PathDao> {
+public interface PathDao extends Dao<Path> {
+
+    void getFromPath(String path_id, String path_position, ValueEventListenerWithType valueEventListener);
 
 }

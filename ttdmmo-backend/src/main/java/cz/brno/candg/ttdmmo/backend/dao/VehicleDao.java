@@ -16,4 +16,6 @@ public interface VehicleDao extends Dao<Bus> {
     void move(int x, int y, String bus_id);
 
     void setArriveTime(double estimatedArriveTimeMs, String bus_id);
+
+    void changeColor(String id, String color);
 }

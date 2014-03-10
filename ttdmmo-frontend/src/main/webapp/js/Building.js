@@ -70,7 +70,7 @@ BuildingFactory.prototype = {
         ctx.fillStyle = '#7F1717';
         ctx.fillRect(0, 0, b, a);
 
-        obj = new this.sheetengine.SheetObject({x: centerp.x - sheetengine.scene.tilewidth / 2 + b / 2, y: centerp.y + sheetengine.scene.tilewidth / 2 - a / 2, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [roof, sideR, sideL, sideB, sideF], {w: 2 * (b + a), h: 4 * h, relu: (b + a), relv: (b + a)});
+        obj = new this.sheetengine.SheetObject({x: centerp.x - sheetengine.scene.tilewidth / 2 + b / 2, y: centerp.y + sheetengine.scene.tilewidth / 2 - a / 2, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [roof, sideR, sideL, sideB, sideF], {w: (b + a), h: (b + a), relu: (b + a) / 2, relv: (b + a) / 2});
 
         var result = new Building(obj);
         return result;
@@ -114,7 +114,7 @@ BuildingFactory.prototype = {
         ctx.fillStyle = '#414141';
         ctx.fillRect(0, 0, b, a);
 
-        obj = new this.sheetengine.SheetObject({x: centerp.x - sheetengine.scene.tilewidth / 2 + b / 2, y: centerp.y + sheetengine.scene.tilewidth / 2 - a / 2, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [roof, sideR, sideL, sideB, sideF], {w: 2 * (b + a), h: 4 * h, relu: (b + a), relv: (b + a)});
+        obj = new this.sheetengine.SheetObject({x: centerp.x - sheetengine.scene.tilewidth / 2 + b / 2, y: centerp.y + sheetengine.scene.tilewidth / 2 - a / 2, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [roof, sideR, sideL, sideB, sideF], {w: (b + a), h: (b + a), relu: (b + a) / 2, relv: (b + a) / 2});
 
         var result = new Building(obj);
         return result;
@@ -173,7 +173,7 @@ BuildingFactory.prototype = {
         ctx.fillStyle = '#331900';
         ctx.fillRect(0, 0, b, a);
 
-        obj = new this.sheetengine.SheetObject({x: centerp.x - sheetengine.scene.tilewidth / 2 + b / 2, y: centerp.y + sheetengine.scene.tilewidth / 2 - a / 2, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [roof, sideR, sideL, sideB, sideF], {w: 2 * (b + a), h: 4 * h, relu: (b + a), relv: (b + a)});
+        obj = new this.sheetengine.SheetObject({x: centerp.x - sheetengine.scene.tilewidth / 2 + b / 2, y: centerp.y + sheetengine.scene.tilewidth / 2 - a / 2, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [roof, sideR, sideL, sideB, sideF], {w: (b + a), h: (b + a), relu: (b + a) / 2, relv: (b + a) / 2});
 
         var result = new Building(obj);
         return result;
@@ -232,7 +232,7 @@ BuildingFactory.prototype = {
         ctx.fillStyle = '#7F1717';
         ctx.fillRect(0, 0, b, a);
 
-        obj = new this.sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [roof, sideR, sideL, sideB, sideF], {w: 2 * (b + a), h: 4 * h, relu: (b + a), relv: (b + a)});
+        obj = new this.sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [roof, sideR, sideL, sideB, sideF], {w: (b + a), h: (b + a), relu: (b + a) / 2, relv: (b + a) / 2});
 
         var result = new Building(obj);
         return result;
@@ -330,7 +330,29 @@ BuildingFactory.prototype = {
         ctx3.fillStyle = '#0000dd';
         ctx3.fillRect(3 * w / 5, h / 5, w / 5, h / 2);
 
-        obj = new this.sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [strecha, roof, side, side2, side3, side4, bok, bok2, top, bottom], {w: 2 * w, h: 4 * h, relu: w, relv: w});
+        obj = new this.sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: 0}, [strecha, roof, side, side2, side3, side4, bok, bok2, top, bottom], {w: this.w, h: this.w, relu: this.w / 2, relv: this.w / 2});
+
+        var result = new Building(obj);
+        return result;
+    },
+    newTownName: function(centerp, name, people)
+    {
+        var w = this.w * 2;
+        var h = this.h * 2;
+
+        var sheetText = new sheetengine.Sheet(
+                {x: 0, y: 0, z: 0},
+        {alphaD: 0, betaD: 0, gammaD: 45},
+        {w: w, h: h}
+        );
+        //sheetText.context.fillStyle = '#FFFFff';
+        //sheetText.context.fillRect(0, 0, 200, 40);
+        sheetText.context.font = "26px sans-serif";
+        sheetText.context.fillStyle = "#ffffff";
+        sheetText.context.textAlign = "center";
+        sheetText.context.fillText(name, w / 2, h - 10);
+
+        obj = new this.sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z + 175}, {alphaD: 0, betaD: 0, gammaD: 0}, [sheetText], {w: w, h: h, relu: w / 2, relv: h / 2});
 
         var result = new Building(obj);
         return result;

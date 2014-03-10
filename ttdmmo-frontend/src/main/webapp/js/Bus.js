@@ -1,4 +1,4 @@
-var busRef = new Firebase('https://ttdmmo1.firebaseio-demo.com/buses');
+var busRef = new Firebase(FbRef.ref + 'buses');
 
 function Bus(sheet, direction, nextField) {
     console.log('Bus instantiated');
@@ -84,58 +84,150 @@ BusFactory.prototype = {
          direction = 90;
          }*/
         var posun = 20;
-        var obj = this.defineBusObj({x: (next.y - data.y) * (-posun) + data.x * this.sheetengine.scene.tilewidth, y: (next.x - data.x) * posun + data.y * this.sheetengine.scene.tilewidth, z: 0}, direction);
+        var obj = this.defineVehicleObj({x: (next.y - data.y) * (-posun) + data.x * this.sheetengine.scene.tilewidth, y: (next.x - data.x) * posun + data.y * this.sheetengine.scene.tilewidth, z: 0}, direction, data.color, data.cargo);
         var result = new Bus(obj, data.direction, data.nextField);
         return result;
     },
-    defineBusObj: function(centerp, direction) {
-        var a = this.w / 12;
-        var b = this.w / 4;
-        var h = this.h;
+    defineBusObj: function(centerp, direction, color) {
+        var a = this.w / 12;//10
+        var b = this.w / 4;//30
+        var h = this.h;//12
         var windowColor = '#0000dd';
-        var busColor = '#B8EFF7';
+        var busColor = color;
 
         // user definition for animation with sheet motion
         var bok = new this.sheetengine.Sheet({x: 0, y: -a / 2, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 0}, {w: b, h: h});
         var ctx = bok.context;
         // head
-        ctx.fillStyle = '#3d1e14';
-        ctx.fillRect(0, 0, 30, 14);
+        ctx.fillStyle = busColor;
+        ctx.fillRect(0, 0, b, h);
         //okna
-        ctx.fillStyle = '#0000dd';
+        ctx.fillStyle = windowColor;
         ctx.fillRect(5, 2, 20, 4);
 
-        var bok2 = new this.sheetengine.Sheet({x: 0, y: a / 2, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 0}, {w: 30, h: h});
+        var bok2 = new this.sheetengine.Sheet({x: 0, y: a / 2, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 0}, {w: b, h: h});
         var ctx2 = bok2.context;
         // body
-        ctx2.fillStyle = '#3d1e14';
-        ctx2.fillRect(0, 0, 30, 14);
-        ctx2.fillStyle = '#0000dd';
+        ctx2.fillStyle = busColor;
+        ctx2.fillRect(0, 0, b, h);
+        ctx2.fillStyle = windowColor;
         ctx2.fillRect(5, 2, 20, 4);
 
         var top = new this.sheetengine.Sheet({x: -b / 2, y: 0, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 90}, {w: a, h: h});
         var ctx4 = top.context;
         // head
-        ctx4.fillStyle = '#3d1e14';
-        ctx4.fillRect(0, 0, 10, 14);
-        ctx4.fillStyle = '#0000dd';
-        ctx4.fillRect(1, 2, 5, 5);
+        ctx4.fillStyle = busColor;
+        ctx4.fillRect(0, 0, a, h);
+        ctx4.fillStyle = windowColor;
+        ctx4.fillRect(1, 2, 8, 6);
 
         var strecha = new this.sheetengine.Sheet({x: 0, y: 0, z: h}, {alphaD: 90, betaD: 0, gammaD: 0}, {w: b, h: a});
         var ctx5 = strecha.context;
         // head
-        ctx5.fillStyle = '#3d1e14';
-        ctx5.fillRect(0, 0, 30, 14);
+        ctx5.fillStyle = busColor;
+        ctx5.fillRect(0, 0, b, h);
 
         var bottom = new this.sheetengine.Sheet({x: b / 2, y: 0, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 90}, {w: a, h: h});
         var ctx3 = bottom.context;
         // head
-        ctx3.fillStyle = '#3d1e14';
-        ctx3.fillRect(0, 0, 10, 14);
+        ctx3.fillStyle = busColor;
+        ctx3.fillRect(0, 0, a, h);
         // define user object
-        return new this.sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: direction}, [strecha, bok, bok2, top, bottom], {w: 50, h: 50, relu: 30, relv: 30});
-    }
+        return new this.sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: direction}, [strecha, bok, bok2, top, bottom], {w: 60, h: 60, relu: 30, relv: 30});
+    },
+    defineVehicleObj: function(centerp, direction, color, cargo) {
+        var a = this.w / 12;//10
+        var b = this.w / 4;//30
+        var h = this.h;//12
+        var windowColor = '#0000dd';
+        var busColor = color;
+        var cabinColor = "#ffffff";
+        var cargoColor = "#603311";
+        var tyreColor = "#010101";
 
+        // user definition for animation with sheet motion
+        var bok = new this.sheetengine.Sheet({x: 0, y: -a / 2, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 0}, {w: b, h: h});
+        var ctx = bok.context;
+        // head
+        ctx.fillStyle = busColor;
+        ctx.fillRect(b / 3, h / 2, 2 * b / 3, h / 2);
+        ctx.fillStyle = cargoColor;
+        ctx.fillRect(b / 3, 0, 2 * b / 3, h / 2);
+        ctx.fillStyle = tyreColor;
+        ctx.fillRect(2 * b / 3 - 1, h - 3, 3, 3);
+        ctx.fillStyle = cabinColor;
+        ctx.fillRect(0, 0, b / 3, h);
+        ctx.fillStyle = tyreColor;
+        ctx.fillRect(b / 6 - 1, h - 3, 3, 3);
+        //okna
+        ctx.fillStyle = windowColor;
+        ctx.fillRect(2, 2, 5, 4);
+        if (cargo === 0)
+            ctx.clearRect(b / 3, 0, 2 * b / 3, h / 2);
+
+        var bok2 = new this.sheetengine.Sheet({x: 0, y: a / 2, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 0}, {w: b, h: h});
+        var ctx2 = bok2.context;
+        // head
+        ctx2.fillStyle = busColor;
+        ctx2.fillRect(b / 3, h / 2, 2 * b / 3, h);
+        ctx2.fillStyle = cargoColor;
+        ctx2.fillRect(b / 3, 0, 2 * b / 3, h / 2);
+        ctx2.fillStyle = tyreColor;
+        ctx2.fillRect(2 * b / 3 - 1, h - 3, 3, 3);
+        ctx2.fillStyle = cabinColor;
+        ctx2.fillRect(0, 0, b / 3, h);
+        ctx2.fillStyle = tyreColor;
+        ctx2.fillRect(b / 6 - 1, h - 3, 3, 3);
+
+        ctx2.fillStyle = windowColor;
+        ctx2.fillRect(2, 2, 5, 4);
+        if (cargo === 0)
+            ctx2.clearRect(b / 3, 0, 2 * b / 3, h / 2);
+
+        var top = new this.sheetengine.Sheet({x: -b / 2, y: 0, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 90}, {w: a, h: h});
+        var ctx4 = top.context;
+        // head
+        ctx4.fillStyle = cabinColor;
+        ctx4.fillRect(0, 0, a, h);
+        ctx4.fillStyle = windowColor;
+        ctx4.fillRect(1, 2, 8, 6);
+
+        var top2 = new this.sheetengine.Sheet({x: -b / 2 + b / 3, y: 0, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 90}, {w: a, h: h});
+        ctx4 = top2.context;
+        // head
+        ctx4.fillStyle = cabinColor;
+        ctx4.fillRect(0, 0, a, h);
+
+        var strecha = new this.sheetengine.Sheet({x: 0, y: 0, z: h}, {alphaD: 90, betaD: 0, gammaD: 0}, {w: b, h: a});
+        var ctx5 = strecha.context;
+        // head
+        ctx5.fillStyle = cabinColor;
+        ctx5.fillRect(0, 0, b / 3, a);
+        ctx5.fillStyle = cargoColor;
+        ctx5.fillRect(b / 3, 0, 2 * b / 3, a);
+        if (cargo === 0)
+            ctx5.clearRect(b / 3, 0, 2 * b / 3, a);
+
+        var back = new this.sheetengine.Sheet({x: b / 2, y: 0, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 90}, {w: a, h: h});
+        var ctx3 = back.context;
+        // head
+        ctx3.fillStyle = busColor;
+        ctx3.fillRect(0, h / 2, a, h / 2);
+
+        ctx3.fillStyle = cargoColor;
+        ctx3.fillRect(0, 0, a, h / 2);
+
+        if (cargo === 0)
+            ctx3.clearRect(0, 0, a, h / 2);
+
+        var bottom = new this.sheetengine.Sheet({x: 0, y: 0, z: 0}, {alphaD: 90, betaD: 0, gammaD: 0}, {w: b, h: a});
+        ctx3 = bottom.context;
+        // head
+        ctx3.fillStyle = busColor;
+        ctx3.fillRect(0, 0, b, a);
+        // define user object
+        return new this.sheetengine.SheetObject({x: centerp.x, y: centerp.y, z: centerp.z}, {alphaD: 0, betaD: 0, gammaD: direction}, [back, strecha, bok, bok2, top, top2, bottom], {w: 60, h: 60, relu: 30, relv: 30});
+    }
 };
 
 

@@ -14,4 +14,8 @@ public interface AuthUserDao extends Dao<AuthUser> {
     void setMoney(String id, int money);
 
     void addBus(String id, String bus_id);
+
+    void removeBus(String id, String bus_id);
+
+    void changeColor(String id, String color);
 }

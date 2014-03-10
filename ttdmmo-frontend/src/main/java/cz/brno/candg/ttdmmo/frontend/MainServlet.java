@@ -1,6 +1,8 @@
 package cz.brno.candg.ttdmmo.frontend;
 
+import cz.brno.candg.ttdmmo.backend.firebase.FbServerTime;
 import java.io.IOException;
+import javax.inject.Inject;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,6 +19,9 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("serial")
 @WebServlet("/map")
 public class MainServlet extends HttpServlet {
+
+    @Inject
+    FbServerTime serverTime;
 
     final static Logger log = LoggerFactory.getLogger(MainServlet.class);
     private static int cislo = 0;

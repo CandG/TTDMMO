@@ -5,7 +5,7 @@
  */
 package cz.brno.candg.ttdmmo.serviceapi;
 
-import cz.brno.candg.ttdmmo.firebase.FBMapReq;
+import cz.brno.candg.ttdmmo.firebase.FbMapReq;
 import cz.brno.candg.ttdmmo.model.MapField;
 import cz.brno.candg.ttdmmo.serviceapi.dto.MapFieldDto;
 
@@ -17,6 +17,6 @@ public interface MapFieldService {
 
     void insertField(MapFieldDto mapFieldDto);
 
-    void build(int money, MapField mapField, FBMapReq firebaseReq);
+    void build(int money, MapField mapField, FbMapReq firebaseReq);
 
 }

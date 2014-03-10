@@ -7,11 +7,12 @@ package cz.brno.candg.ttdmmo.backend.firebase.listeners;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-
 import cz.brno.candg.ttdmmo.firebase.NewVehicleReq;
 import cz.brno.candg.ttdmmo.model.AuthUser;
 import cz.brno.candg.ttdmmo.model.MapField;
 import cz.brno.candg.ttdmmo.serviceapi.VehicleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -19,19 +20,12 @@ import cz.brno.candg.ttdmmo.serviceapi.VehicleService;
  */
 public class DataToNewVehicleServiceListener extends ValueEventListenerWithType {
 
-    private double serverOffset;
+    final static Logger log = LoggerFactory.getLogger(DataToNewVehicleServiceListener.class);
+
     private NewVehicleReq fbReq;
     private VehicleService busService;
     private MapField mapField = null;
     private AuthUser authUser = null;
-
-    public double getServerOffset() {
-        return serverOffset;
-    }
-
-    public void setServerOffset(double serverOffset) {
-        this.serverOffset = serverOffset;
-    }
 
     public MapField getMapField() {
         return mapField;
@@ -59,15 +53,17 @@ public class DataToNewVehicleServiceListener extends ValueEventListenerWithType 
 
     @Override
     public void onDataChange(DataSnapshot ds) {
-        System.out.println(ds.getName() + " / " + ds.getValue() + "QQ:" + MapField.indexFromXY(fbReq.getX(), fbReq.getY()));
-        if (ds.getName().equals(MapField.indexFromXY(fbReq.getX(), fbReq.getY()))) {
+        if (ds.getName().equals(fbReq.getXy())) {
             setMapField(ds.getValue(MapField.class));
+            log.info("mapField" + ds.getValue(MapField.class));
         } else {
             setAuthUser(ds.getValue(AuthUser.class));
+            log.info("user" + ds.getValue());
         }
-
+        log.info(ds.getName());
         if (getMapField() != null && getAuthUser() != null) {
-            busService.create(serverOffset, mapField, authUser, fbReq);
+            busService.create(mapField, authUser, fbReq);
+            log.info("all");
         }
     }
 

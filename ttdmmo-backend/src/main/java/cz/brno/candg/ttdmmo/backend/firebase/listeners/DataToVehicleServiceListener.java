@@ -17,7 +17,6 @@ import cz.brno.candg.ttdmmo.serviceapi.VehicleService;
  */
 public class DataToVehicleServiceListener extends ValueEventListenerWithType {
 
-    private double serverOffset;
     private MapField mapField = null;
     private String nextMapField_id = "x";
     private Bus bus;
@@ -37,14 +36,6 @@ public class DataToVehicleServiceListener extends ValueEventListenerWithType {
 
     public void setBusService(VehicleService busService) {
         this.busService = busService;
-    }
-
-    public double getServerOffset() {
-        return serverOffset;
-    }
-
-    public void setServerOffset(double serverOffset) {
-        this.serverOffset = serverOffset;
     }
 
     public MapField getMapField() {
@@ -73,7 +64,7 @@ public class DataToVehicleServiceListener extends ValueEventListenerWithType {
         }
 
         if (getMapField() != null && getNextMapField_id() != "x") {
-            busService.move(serverOffset, mapField, nextMapField_id, bus);
+            busService.move(mapField, nextMapField_id, bus);
         }
     }
 

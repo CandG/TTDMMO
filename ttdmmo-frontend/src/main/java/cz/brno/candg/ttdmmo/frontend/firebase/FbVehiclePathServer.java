@@ -10,6 +10,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import cz.brno.candg.ttdmmo.backend.adapter.VehicleServiceAdapter;
+import cz.brno.candg.ttdmmo.constants.FbRef;
 
 import cz.brno.candg.ttdmmo.firebase.PathReq;
 import javax.inject.Inject;
@@ -29,7 +30,7 @@ public class FbVehiclePathServer {
     @Inject
     VehicleServiceAdapter vehicleServiceAdapter;
 
-    private Firebase refRequests = new Firebase("https://ttdmmoq1.firebaseio-demo.com/fronta3");
+    private Firebase refRequests = new Firebase(FbRef.refQ + "pathVehicle");
     private static int cislo = 0;
 
     public FbVehiclePathServer() {

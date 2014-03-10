@@ -15,7 +15,7 @@ public interface Dao<T> {
     /*  Create the entity
      * @throws IllegalArgumentException if parameter is null or invalid
      */
-    Long create(T entity);
+    String create(T entity);
 
     /*  Get the data to the valueEventListener
      * @throws IllegalArgumentException if parameter is null or invalid

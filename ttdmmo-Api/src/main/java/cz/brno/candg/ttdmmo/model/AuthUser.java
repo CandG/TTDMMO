@@ -10,18 +10,35 @@ import java.util.Map;
  */
 public class AuthUser {
 
-    int money;
-    String name;
-    String user_id;
+    private int money;
+    private String name;
+    private String email;
+    private String user_id;
+    private String position;
+    private String color;
     private Map<String, Boolean> buses = new HashMap<String, Boolean>();
 
     public AuthUser() {
     }
 
-    public AuthUser(int money, String name, String user_id) {
-        this.money = money;
-        this.name = name;
-        this.user_id = user_id;
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public Map<String, Boolean> getBuses() {

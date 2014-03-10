@@ -5,6 +5,10 @@
  */
 package cz.brno.candg.ttdmmo.firebase;
 
+import cz.brno.candg.ttdmmo.model.MapField;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author lastuvka
@@ -12,19 +16,8 @@ package cz.brno.candg.ttdmmo.firebase;
 public class PathReq {
 //private Map<String, Boolean> stops = new HashMap<String, Boolean>();
 
-    private String stops;
+    private List<String> stops = new ArrayList<String>();
     private String bus_id;
-
-    public PathReq() {
-    }
-
-    public String getStops() {
-        return stops;
-    }
-
-    public void setStops(String stops) {
-        this.stops = stops;
-    }
 
     public String getBus_id() {
         return bus_id;
@@ -32,6 +25,10 @@ public class PathReq {
 
     public void setBus_id(String bus_id) {
         this.bus_id = bus_id;
+    }
+
+    public List<String> getStops() {
+        return stops;
     }
 
     @Override

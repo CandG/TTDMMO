@@ -1,0 +1,18 @@
+<div class="container">
+
+    <form class="form-signin" role="form">
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <input type="email" ng-model="email" class="form-control" placeholder="Email address" required autofocus>
+        <input type="password" ng-model="pass" class="form-control" placeholder="Password" required>
+        <input ng-show="createMode" type="password" ng-model="confirm" class="form-control" placeholder="Confirm password" required>
+        <button ng-hide="createMode" ng-click="login()" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <a ng-cloak  href="#/register" class="btn btn-lg btn-primary btn-block" role="button">Cancel</a>
+    </form>
+    <p ng-show="err" class="error">{{err}}</p>
+</div> <!-- /container -->
+
+
+
+
+
+

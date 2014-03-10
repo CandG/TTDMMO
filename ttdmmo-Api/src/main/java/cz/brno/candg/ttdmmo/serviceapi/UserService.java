@@ -1,5 +1,6 @@
 package cz.brno.candg.ttdmmo.serviceapi;
 
+import cz.brno.candg.ttdmmo.model.AuthUser;
 import cz.brno.candg.ttdmmo.serviceapi.dto.AuthUserDto;
 
 /**
@@ -8,6 +9,10 @@ import cz.brno.candg.ttdmmo.serviceapi.dto.AuthUserDto;
  * @author Jan Kucera (Greld)
  */
 public interface UserService {
+
+    void changeColor(AuthUser user, String color);
+
+    void setPosition(AuthUser user);
 
     /**
      * Verify if user with given username and password exists.
@@ -57,7 +62,5 @@ public interface UserService {
      * @return user with given id.
      */
     AuthUserDto getById(Long id);
-
-    void getByIdFirebase(Long id);
 
 }

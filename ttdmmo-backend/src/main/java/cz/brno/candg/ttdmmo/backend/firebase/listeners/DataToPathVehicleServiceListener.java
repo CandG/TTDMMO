@@ -8,10 +8,11 @@ package cz.brno.candg.ttdmmo.backend.firebase.listeners;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
 import cz.brno.candg.ttdmmo.firebase.PathReq;
-import cz.brno.candg.ttdmmo.model.AuthUser;
 import cz.brno.candg.ttdmmo.model.Bus;
 import cz.brno.candg.ttdmmo.model.MapField;
 import cz.brno.candg.ttdmmo.serviceapi.VehicleService;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -19,19 +20,10 @@ import cz.brno.candg.ttdmmo.serviceapi.VehicleService;
  */
 public class DataToPathVehicleServiceListener extends ValueEventListenerWithType {
 
-    private double serverOffset;
     private PathReq fbReq;
-    private VehicleService busService;
-    private String path = "x";
+    private VehicleService vehicleService;
+    private List<MapField> stops = new ArrayList<MapField>();
     private Bus bus;
-
-    public double getServerOffset() {
-        return serverOffset;
-    }
-
-    public void setServerOffset(double serverOffset) {
-        this.serverOffset = serverOffset;
-    }
 
     public PathReq getFbReq() {
         return fbReq;
@@ -42,19 +34,19 @@ public class DataToPathVehicleServiceListener extends ValueEventListenerWithType
     }
 
     public VehicleService getBusService() {
-        return busService;
+        return vehicleService;
     }
 
     public void setBusService(VehicleService busService) {
-        this.busService = busService;
+        this.vehicleService = busService;
     }
 
-    public String getPath() {
-        return path;
+    public List<MapField> getStops() {
+        return stops;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setStops(List<MapField> stops) {
+        this.stops = stops;
     }
 
     public Bus getBus() {
@@ -67,15 +59,16 @@ public class DataToPathVehicleServiceListener extends ValueEventListenerWithType
 
     @Override
     public void onDataChange(DataSnapshot ds) {
-        System.out.println(ds.getName() + " / " + ds.getValue() + "QQ:");
+        System.out.println("Ds name: " + ds.getName() + " / ds value: " + ds.getValue() + " ;QQ");
         if (ds.getName().equals(fbReq.getBus_id())) {
             setBus(ds.getValue(Bus.class));
         } else {
-            setPath(ds.getName());
+            // Path.class
+            stops.add(ds.getValue(MapField.class));
         }
 
-        if (getBus() != null && getPath() != "x") {
-            busService.setPath(serverOffset, bus, path, fbReq);
+        if (getBus() != null && stops != null && stops.size() == fbReq.getStops().size()) {
+            vehicleService.setPath(bus, stops, fbReq);
         }
     }
 

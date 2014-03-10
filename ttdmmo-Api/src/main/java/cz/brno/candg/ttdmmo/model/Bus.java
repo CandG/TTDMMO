@@ -24,12 +24,21 @@ public class Bus {
     private String name;
     private String path_id;
     private String nextField;
+    private String color;
     private int path_position;
     private int position;
     private double startTime;
     private List<Long> bus_stops = new ArrayList<Long>();
 
     public Bus() {
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public int getCargo() {
@@ -160,7 +169,7 @@ public class Bus {
 
     @Override
     public String toString() {
-        return "Bus{" + "x=" + x + ", y=" + y + ", direction=" + direction + ", user_id=" + user_id + ", bus_id=" + bus_id + ", name=" + name + ", path_id=" + path_id + ", nextField=" + nextField + ", path_position=" + path_position + ", position=" + position + ", startTime=" + startTime + ", bus_stops=" + bus_stops + '}';
+        return "Bus{" + "x=" + x + ", y=" + y + ", direction=" + direction + ", cargo=" + cargo + ", user_id=" + user_id + ", bus_id=" + bus_id + ", name=" + name + ", path_id=" + path_id + ", nextField=" + nextField + ", color=" + color + ", path_position=" + path_position + ", position=" + position + ", startTime=" + startTime + ", bus_stops=" + bus_stops + '}';
     }
 
 }

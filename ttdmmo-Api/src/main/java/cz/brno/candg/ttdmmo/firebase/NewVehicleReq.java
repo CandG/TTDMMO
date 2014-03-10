@@ -13,8 +13,7 @@ public class NewVehicleReq {
 
     private String user_id;
     private String name;
-    private int x;
-    private int y;
+    private String xy;
 
     public String getUser_id() {
         return user_id;
@@ -24,17 +23,13 @@ public class NewVehicleReq {
         return name;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
+    public String getXy() {
+        return xy;
     }
 
     @Override
     public String toString() {
-        return "NewVehicleReq{" + "user_id=" + user_id + ", name=" + name + ", x=" + x + ", y=" + y + '}';
+        return "NewVehicleReq{" + "user_id=" + user_id + ", name=" + name + ", xy=" + xy + '}';
     }
 
 }

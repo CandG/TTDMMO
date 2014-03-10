@@ -1,0 +1,46 @@
+<!-- Main jumbotron for a primary marketing message or call to action -->
+<div class="jumbotron">
+    <div class="container">
+        <h1>Welcome</h1>          
+        <p class="status good" ng-show-auth="login">I hope you enjoy the game.
+            <br ><br ><a href="#/map" class="btn btn-primary btn-lg" role="button">Start playing &raquo;</a></p>
+        <p ng-show-auth="logout">
+            Are you ready? Create account and start to play. It is all for free. So do not wait!!!
+            <br ><br ><a href="#/register" class="btn btn-primary btn-lg" role="button">Create Account &raquo;</a></p>
+        <p class="status error" ng-show-auth="error">{{auth.error}}</p>
+        <p></p>
+    </div>
+</div>
+<div class="container">
+    <!-- Example row of columns -->
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Best cities</h2>
+            <p>The most power cities are:</p>
+            1. Brno
+
+        </div>
+        <div class="col-md-4">
+            <h2>Contact</h2>
+            <p>zlastuvka at gmail com</p>
+        </div>
+        <div class="col-md-4">
+            <h2>Manual</h2>
+            <p>Do you need to help with playing. In manual you find the answers to your questions.</p>
+            <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+        </div>
+    </div>
+
+    <hr>
+
+    <footer>
+        <p>&copy; TTDMMO 2014 v<span app-version></span></p>
+    </footer>
+</div> <!-- /container -->
+
+
+
+
+
+
+
