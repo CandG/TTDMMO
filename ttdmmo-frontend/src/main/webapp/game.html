@@ -6,30 +6,49 @@
         <script src="https://cdn.firebase.com/libs/firebase-util/0.1.0/firebase-util.min.js"></script>
         <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js'></script>
         <script>
-            /*  var refer = Firebase.util.join(
-             {
-             ref: new Firebase("https://ttdmmo.firebaseio.com/t/map"),
-             keyMap: {x: 'x', y: 'y', obj: 'obj', type: 'type'}
-             },
-             {
-             ref: new Firebase("https://ttdmmo.firebaseio.com/t/cities"),
-             keyMap: {name: 'name'}
-             }
-             );
-             x = 0;
-             max = 1;
-             console.time("one initialize");
-             refer.child("-2:-2").on('value', function(snap) {
-             console.debug(snap.val());
-             x++;
-             if (x == max)
-             console.timeEnd("one initialize");
-             });*/
-            ref = new Firebase("https://ttdmmo.firebaseio.com/users");
-            ref.on('child_added', function(snap) {
-                console.debug(snap.val());
+            FbRef.ref = "https://ttdmmoq.firebaseio.com/";
 
+            var busRef = new Firebase(FbRef.ref + 'buses');
+            var pathRef = new Firebase(FbRef.ref + 'paths');
+            var busPathRef = Firebase.util.join(
+                    {
+                        ref: busRef,
+                        keyMap: {startTime: 'startTime', direction: 'direction', type: 'type', p_size: 'p_size', cargo: 'cargo', color: 'color', name: 'name', speed: 'speed'}
+                    },
+            {
+                ref: pathRef,
+                keyMap: {path: 'path'}
+            }
+            );
+
+            var refer = Firebase.util.join(
+                    {
+                        ref: new Firebase("https://ttdmmoq.firebaseio.com/buses"),
+                        keyMap: {name: 'x', y: 'y', speed: 'obj', type: 'type'}
+                    },
+            {
+                ref: new Firebase("https://ttdmmoq.firebaseio.com/paths"),
+                keyMap: {path: 'name'}
+            }
+            );
+            x = 0;
+            max = 1;
+            console.time("one initialize");
+            busPathRef.child("-JIOfqo6JFB9FRBRl8oN").on('value', function(snap) {
+                //var data = snap.val();
+                //data.id = snap.name();
+                console.debug(snap.name());
+                console.log("one f");
+                console.debug(snap.val());
+                x++;
+                if (x == max)
+                    console.timeEnd("one initialize");
             });
+            /* ref = new Firebase("https://ttdmmo.firebaseio.com/users");
+             ref.on('child_added', function(snap) {
+             console.debug(snap.val());
+             
+             });*/
         </script>
     </head>
     <body>

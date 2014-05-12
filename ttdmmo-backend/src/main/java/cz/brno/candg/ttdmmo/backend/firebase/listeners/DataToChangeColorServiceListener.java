@@ -1,31 +1,32 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.brno.candg.ttdmmo.backend.firebase.listeners;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-import cz.brno.candg.ttdmmo.firebase.FbChangeColorReq;
+import com.firebase.client.ValueEventListener;
+import cz.brno.candg.ttdmmo.dto.ChangeColorDTO;
 import cz.brno.candg.ttdmmo.model.AuthUser;
 import cz.brno.candg.ttdmmo.serviceapi.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Data to user service for method changeColor
  *
  * @author lastuvka
  */
-public class DataToChangeColorServiceListener extends ValueEventListenerWithType {
+public class DataToChangeColorServiceListener implements ValueEventListener {
 
-    private FbChangeColorReq fbReq;
+    final static Logger log = LoggerFactory.getLogger(DataToChangeColorServiceListener.class);
+
+    private ChangeColorDTO fbReq;
     private AuthUser authUser = null;
     private UserService userService;
 
-    public FbChangeColorReq getFbReq() {
+    public ChangeColorDTO getFbReq() {
         return fbReq;
     }
 
-    public void setFbReq(FbChangeColorReq fbReq) {
+    public void setFbReq(ChangeColorDTO fbReq) {
         this.fbReq = fbReq;
     }
 
@@ -47,6 +48,7 @@ public class DataToChangeColorServiceListener extends ValueEventListenerWithType
 
     @Override
     public void onDataChange(DataSnapshot ds) {
+        log.info("Additional data recived: user - " + ds.getValue());
         setAuthUser(ds.getValue(AuthUser.class));
         userService.changeColor(authUser, fbReq.getColor());
     }

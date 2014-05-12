@@ -1,66 +1,30 @@
 package cz.brno.candg.ttdmmo.serviceapi;
 
+import cz.brno.candg.ttdmmo.dto.NewUserDTO;
 import cz.brno.candg.ttdmmo.model.AuthUser;
-import cz.brno.candg.ttdmmo.serviceapi.dto.AuthUserDto;
 
 /**
- * User service interface for operations on User DTO.
+ * User service interface for operations on User.
  *
- * @author Jan Kucera (Greld)
+ * @author Lastuvka
  */
 public interface UserService {
 
+    /**
+     * Change color for given user
+     *
+     * @param user
+     * @param color
+     */
     void changeColor(AuthUser user, String color);
 
-    void setPosition(AuthUser user);
-
     /**
-     * Verify if user with given username and password exists.
-     *
-     * @param username
-     * @param password
-     * @return User if user with given username and password exist, null
-     * otherwise
-     */
-    AuthUserDto login(String username, String password);
-
-    /**
-     * Create new user.
+     * Add to existing user money, color,position - basic settings.
      *
      * @param user
-     * @param password
-     * @return User id if registration was successfull, null otherwise
+     * @param x
+     * @param y
      */
-    Long register(AuthUserDto user, String password);
-
-    /**
-     * Update user
-     *
-     * @param user
-     */
-    void update(AuthUserDto user);
-
-    /**
-     * Remove user
-     *
-     * @param user
-     */
-    void remove(AuthUserDto user);
-
-    /**
-     * Find user by username
-     *
-     * @param username
-     * @return user with given username.
-     */
-    AuthUserDto getByUsername(String username);
-
-    /**
-     * Find user by id
-     *
-     * @param id
-     * @return user with given id.
-     */
-    AuthUserDto getById(Long id);
+    void register(NewUserDTO user, int x, int y);
 
 }

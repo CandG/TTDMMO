@@ -1,58 +1,77 @@
 var pathImages = 'images/field/';
-var imgRoad = new Image();
-var imgGrass = new Image();
-var imgZas = new Image();
+
 var imgBuild = new Image();
 imgBuild.src = pathImages + 'imgBuild.jpg';
+var imgZas = new Image();
 imgZas.src = pathImages + 'imgZas.jpg';
-
 var imgRoad2 = new Image();
 imgRoad2.src = pathImages + 'imgRoad2.jpg';
-
 var imgCity = new Image();
 imgCity.src = pathImages + 'imgCity.jpg';
-
 var imgCross = new Image();
 imgCross.src = pathImages + 'imgCross.jpg';
-
 var imgDepo = new Image();
 imgDepo.src = pathImages + 'imgDepo.jpg';
-
+var imgRoad = new Image();
 imgRoad.src = pathImages + 'imgRoad.jpg';
+var imgGrass = new Image();
 imgGrass.src = pathImages + 'imgGrass.jpg';
 var imgFarm = new Image();
 imgFarm.src = pathImages + 'imgFarm.jpg';
+//var imgWoodField = new Image();
+//imgWoodField.src = pathImages + 'imgWoodField.jpg';
+var imgFarmField = new Image();
+imgFarmField.src = pathImages + 'imgFarmField.jpg';
 
+/*Offset time - server time vs. client time*/
+var offsetFirebase;
+var offsetRef = new Firebase(FbRef.ref + ".info/serverTimeOffset");
+offsetRef.on("value", function(snap) {
+    offsetFirebase = snap.val();
+});
+
+
+/*
+ * Game 
+ * Object for storing game data
+ * 
+ * @returns {Game}
+ */
 function Game() {
     console.log('Game instantiated');
     var initialized = false;
     var self = this;
     this.objToInsert = '';
     this.keys = {u: 0, d: 0, l: 0, r: 0}; // pressed keys: up, down, left, right
-    this.boundary = {}; // boundary of user movements without loading new yards
-    this.cityMap = {size: 5, padding: 20};
+    this.cityMapOpts = {size: 5, padding: 20};
     this.zoom = 1;
     this.firebaseMap = null;
+    this.cityMap = null;
     this.radius = 5;
     this.camera = null;
-    this.max = 10;
+    this.cityCamera = null;
     this.w = 120;
     sheetengine.scene.tilewidth = this.w;
+    sheetengine2.scene.tilewidth = this.cityMapOpts.size * this.cityMapOpts.padding;
     this.timer = function() {
         var move = 10;
         x = 0;
         y = 0;
         if (self.keys.u) {
             x = -move;
+            y = -move;
         }
         if (self.keys.d) {
             x = move;
+            y = move;
         }
         if (self.keys.r) {
+            x = move;
             y = -move;
         }
         if (self.keys.l) {
-            y = +move;
+            x = -move;
+            y = move;
         }
 
 
@@ -70,10 +89,13 @@ function Game() {
                 sheetengine.calc.calculateAllSheets();
                 sheetengine.drawing.drawScene(true);
             }
-            /*sheetengine.calc.calculateChangedSheets();
-             sheetengine.drawing.drawScene();*/
         }
-
+        if (sheetengine2.dirty) {
+            console.log("redraw2");
+            sheetengine2.dirty = 0;
+            sheetengine2.calc.calculateAllSheets();
+            sheetengine2.drawing.drawScene(true);
+        }
     };
     onkeydown = function(event) {
         self.setKeys(event, 1);
@@ -86,21 +108,22 @@ function Game() {
 Game.prototype = {
     constructor: Game,
     init: function(position) {
-        this.initialized = true;
-        canvasElement = document.getElementById('mainCanvas');
-        sheetengine.scene.init(canvasElement, {w: 1450, h: 1225});
+        var canvasElement = document.getElementById('mainCanvas');
+        sheetengine.scene.init(canvasElement, {w: 1250, h: 1000});
         var canvasElement2 = document.getElementById('cityCanvas');
-        sheetengine2.scene.init(canvasElement2, {w: 1450, h: 1225});
+        sheetengine2.scene.init(canvasElement2, {w: 850, h: 625});
         // define camera
+
         this.camera = {x: position.x * this.w, y: position.y * this.w, z: position.z * this.w};
         sheetengine.scene.setCenter({x: this.camera.x, y: this.camera.y, z: this.camera.z});
-        sheetengine.scene.translateBackground(
-                {x: 0, y: 0},
-        {x: this.camera.x, y: this.camera.y}
-        );
+        sheetengine.scene.translateBackground({x: 0, y: 0}, {x: this.camera.x, y: this.camera.y});
 
+        this.cityCamera = {x: position.x * this.cityMapOpts.size, y: position.y * this.cityMapOpts.size, z: position.z * this.cityMapOpts.size};
+        sheetengine2.scene.setCenter({x: this.cityCamera.x, y: this.cityCamera.y, z: this.cityCamera.z});
+        sheetengine2.scene.translateBackground({x: 0, y: 0}, {x: this.cityCamera.x, y: this.cityCamera.y});
 
-        var w = 60;
+        /*cityMap rect*/
+        var w = 54;
         var h = 40;
         var sheetRect = new sheetengine2.Sheet(
                 {x: 0, y: 0, z: 0},
@@ -110,48 +133,35 @@ Game.prototype = {
         sheetRect.context.fillStyle = '#FFFFff';
         sheetRect.context.fillRect(0, 0, w, w);
         sheetRect.context.clearRect(3, 3, w - 6, h - 6);
-        var obj = new sheetengine2.SheetObject({x: position.x * this.cityMap.size, y: position.y * this.cityMap.size, z: 10}, {alphaD: 0, betaD: 0, gammaD: 0}, [sheetRect], {w: w, h: h, relu: w / 2, relv: h / 2});
+        //+camera
+        var obj = new sheetengine2.SheetObject({x: this.cityCamera.x, y: this.cityCamera.y, z: 10}, {alphaD: 0, betaD: 0, gammaD: 0}, [sheetRect], {w: w, h: h, relu: w / 2, relv: h / 2});
+        this.cityMapOpts.rect = obj;
+        /*cityMap center*/
+        var padding = this.cityMapOpts.padding;
+        var size = this.cityMapOpts.size;
+        var basesheet = new sheetengine2.BaseSheet({x: 0, y: 0, z: 0}, {alphaD: 270, betaD: 0, gammaD: 0}, {w: padding * size, h: padding * size});
+        basesheet.img = imgGrass;
 
-        this.cityMap.rect = obj;
-
-
-        // get relative yard coordinates and set initial boundary for visible yards
         var yardpos = sheetengine.scene.getYardFromPos(this.camera);
-        this.setBoundary(yardpos);
-        this.firebaseMap = new FirebaseMap();
-        this.firebaseMap.setLevel(8);
-        this.firebaseMap.setFieldFactory(new SheetengineFieldFactory(sheetengine));
-        this.firebaseMap.init(position);
 
-        this.initControls();
-    },
-    initCityMap: function(city, isMine) {
-        var padding = this.cityMap.padding;
-        var size = this.cityMap.size;
-        var position = XYFromIndex(city.xy);
-        var basesheet = new sheetengine2.BaseSheet({x: position.x * size, y: position.y * size, z: 0}, {alphaD: 270, betaD: 0, gammaD: 0}, {w: padding * size, h: padding * size});
-        basesheet.img = imgCity;
+        if (!this.initialized) {
+            this.initControls();
+            this.cityMap = new CityMap();
+            this.cityMap.setLevel(3);
+            this.cityMap.setPadding(this.cityMapOpts.padding);
+            this.cityMap.setFieldFactory(new SheetengineCityFactory(sheetengine2, this.cityMapOpts.size));
+            this.cityMap.init(position);
 
-        var w = 140;
-        var h = 20;
-        var sheetText = new sheetengine2.Sheet(
-                {x: 0, y: 0, z: 0},
-        {alphaD: 0, betaD: 0, gammaD: 45},
-        {w: w, h: h}
-        );
-        sheetText.context.font = "13px sans-serif";
-        if (isMine)
-            sheetText.context.fillStyle = "#ff0000";
-        else
-            sheetText.context.fillStyle = "#ffffff";
-        sheetText.context.textAlign = "center";
-        sheetText.context.fillText(city.name, w / 2, h - 10);
-
-        var obj = new sheetengine2.SheetObject({x: position.x * size, y: position.y * size, z: 10}, {alphaD: 0, betaD: 0, gammaD: 0}, [sheetText], {w: w, h: h, relu: w / 2, relv: h / 2});
-
-
-        sheetengine2.calc.calculateAllSheets();
-        sheetengine2.drawing.drawScene(true);
+            this.firebaseMap = new FirebaseMap();
+            this.firebaseMap.setLevel(8);
+            this.firebaseMap.setFieldFactory(new SheetengineFieldFactory(sheetengine));
+            this.firebaseMap.init(position);
+        }
+        else {
+            this.cityMap.reInit(position);
+            this.firebaseMap.reInit(position);
+        }
+        this.initialized = true;
     },
     clickPosition: function(x, y, engine) {
         var yoom = this.zoom;
@@ -187,13 +197,8 @@ Game.prototype = {
         sheetengine.scene.setCenter({x: self.camera.x, y: self.camera.y, z: self.camera.z});
         var yardpos2 = sheetengine.scene.getYardFromPos(self.camera);
         //console.debug(oldcentertile);
-        //console.debug(yardpos2);
-        //console.debug(sheetengine.scene.tilewidth);
-        //console.debug(demo.camera);
         if (yardpos.relyardx != yardpos2.relyardx || yardpos.relyardy != yardpos2.relyardy || yardpos.relyardz != yardpos2.relyardz)
         {
-            //  set new boundary
-            self.setBoundary(yardpos2);
             var newpos = {x: yardpos2.relyardx, y: yardpos2.relyardy};
             self.firebaseMap.changePosition(oldcentertile, newpos);
             // translate background
@@ -201,15 +206,43 @@ Game.prototype = {
                     {x: oldcentertile.x * self.w, y: oldcentertile.y * self.w},
             {x: yardpos2.relyardx * self.w, y: yardpos2.relyardy * self.w}
             );
-            this.moveRect({x: (yardpos2.relyardx - oldcentertile.x) * this.cityMap.size, y: (yardpos2.relyardy - oldcentertile.y) * this.cityMap.size, z: 0});
+            this.moveRect({x: (yardpos2.relyardx - oldcentertile.x) * this.cityMapOpts.size, y: (yardpos2.relyardy - oldcentertile.y) * this.cityMapOpts.size, z: 0});
             sheetengine.dirty = 0;
+            console.log("redraw");
             sheetengine.calc.calculateAllSheets();
             sheetengine.drawing.drawScene(true);
         }
     },
+    moveViewPointCity: function(targetp, vSelf) {
+        if (!vSelf)
+            var self = this;
+        else
+            var self = vSelf;
+        var yardpos = sheetengine2.scene.getYardFromPos(self.cityCamera);
+
+        var oldcentertile = {x: yardpos.relyardx * self.cityMapOpts.padding, y: yardpos.relyardy * self.cityMapOpts.padding, z: yardpos.relyardz};
+        // move camera
+        self.cityCamera = targetp;
+        // move center
+        sheetengine2.scene.setCenter({x: self.cityCamera.x, y: self.cityCamera.y, z: self.cityCamera.z});
+        var yardpos2 = sheetengine2.scene.getYardFromPos(self.cityCamera);
+        console.debug(oldcentertile);
+        if (yardpos.relyardx != yardpos2.relyardx || yardpos.relyardy != yardpos2.relyardy || yardpos.relyardz != yardpos2.relyardz)
+        {
+            var newpos = {x: yardpos2.relyardx * self.cityMapOpts.padding, y: yardpos2.relyardy * self.cityMapOpts.padding};
+            self.cityMap.changePosition(oldcentertile, newpos);
+            sheetengine2.scene.translateBackground(
+                    {x: yardpos.relyardx * sheetengine2.scene.tilewidth, y: yardpos.relyardy * sheetengine2.scene.tilewidth},
+            {x: yardpos2.relyardx * sheetengine2.scene.tilewidth, y: yardpos2.relyardy * sheetengine2.scene.tilewidth}
+            );
+            sheetengine2.dirty = 0;
+            sheetengine2.calc.calculateAllSheets();
+            sheetengine2.drawing.drawScene(true);
+        }
+    },
     moveRect: function(position) {
         console.debug(position);
-        this.cityMap.rect.move(position);
+        this.cityMapOpts.rect.move(position);
         sheetengine2.calc.calculateAllSheets();
         sheetengine2.drawing.drawScene(true);
     },
@@ -239,20 +272,10 @@ Game.prototype = {
         }
         if (keyProcessed)
             event.preventDefault();
-    },
-    setBoundary: function(yardpos) {
-        // for boundary we use relative yard coordinates
-        var radius = this.radius;
-        this.boundary = {
-            xmin: (yardpos.relyardx - radius) * sheetengine.scene.tilewidth,
-            ymin: (yardpos.relyardy - radius) * sheetengine.scene.tilewidth,
-            xmax: (yardpos.relyardx + radius) * sheetengine.scene.tilewidth,
-            ymax: (yardpos.relyardy + radius) * sheetengine.scene.tilewidth
-        };
     }
 
 };
 
 
-
+var traman = new Game();
 

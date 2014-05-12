@@ -70,9 +70,15 @@ angular.module('myApp.service.login', ['firebase', 'myApp.service.firebase'])
             }])
 
         .factory('profileCreator', ['firebaseRef', '$timeout', function(firebaseRef, $timeout) {
-                return function(id, email, callback) {
-                    firebaseRef('newUsers/' + id).set({user_id: id, email: email, name: firstPartOfEmail(email)});
-                    firebaseRef('users/' + id).set({user_id: id, email: email, name: firstPartOfEmail(email)}, function(err) {
+                return function(id, email, cityname, callback) {
+                    var fbRef = {
+                        user: new Firebase(FbRef.refD + 'users/' + id),
+                        newUsers: new Firebase(FbRef.refQ + 'newUsers/' + id),
+                        manual: new Firebase(FbRef.refD + 'manual/' + id),
+                    };
+                    fbRef.newUsers.setWithPriority({user_id: id, email: email, city: cityname, name: firstPartOfEmail(email)}, Math.floor((Math.random() * 1000) + 1));
+                    fbRef.manual.set(0);
+                    fbRef.user.set({user_id: id, email: email, name: firstPartOfEmail(email)}, function(err) {
                         //err && console.error(err);
                         if (callback) {
                             $timeout(function() {

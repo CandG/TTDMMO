@@ -1,38 +1,43 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.brno.candg.ttdmmo.backend.firebase.listeners;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-import cz.brno.candg.ttdmmo.firebase.FbSellVehicleReq;
+import com.firebase.client.ValueEventListener;
+import cz.brno.candg.ttdmmo.dto.SellVehicleDTO;
 import cz.brno.candg.ttdmmo.model.AuthUser;
-import cz.brno.candg.ttdmmo.model.Bus;
+import cz.brno.candg.ttdmmo.model.Path;
 import cz.brno.candg.ttdmmo.serviceapi.VehicleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Data to vehicle service for method sell
  *
  * @author lastuvka
  */
-public class DataToSellVehicleServiceListener extends ValueEventListenerWithType {
+public class DataToSellVehicleServiceListener implements ValueEventListener {
 
-    private FbSellVehicleReq fbReq;
+    final static Logger log = LoggerFactory.getLogger(DataToSellVehicleServiceListener.class);
+
+    private SellVehicleDTO fbReq;
     private VehicleService vehicleService;
-    private Bus bus = null;
+    private Path path = null;
+    private String isPath = "x";
     private AuthUser authUser = null;
 
     @Override
     public void onDataChange(DataSnapshot ds) {
-        if (ds.getName().equals(fbReq.getBus_id())) {
-            setBus(ds.getValue(Bus.class));
+        if (ds.getName().equals(fbReq.getVehicle_id())) {
+            log.info("Additional data recived: path - " + ds.getValue());
+            setPath(ds.getValue(Path.class));
+            isPath = null;
         } else {
+            log.info("Additional data recived: user - " + ds.getValue());
             setAuthUser(ds.getValue(AuthUser.class));
         }
 
-        if (getBus() != null && getAuthUser() != null) {
-            vehicleService.sell(authUser, bus, fbReq);
+        if ((getPath() != null || isPath == null) && getAuthUser() != null) {
+            vehicleService.sell(authUser, path, fbReq);
         }
     }
 
@@ -40,11 +45,19 @@ public class DataToSellVehicleServiceListener extends ValueEventListenerWithType
     public void onCancelled(FirebaseError fe) {
     }
 
-    public FbSellVehicleReq getFbReq() {
+    public Path getPath() {
+        return path;
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
+    public SellVehicleDTO getFbReq() {
         return fbReq;
     }
 
-    public void setFbReq(FbSellVehicleReq fbReq) {
+    public void setFbReq(SellVehicleDTO fbReq) {
         this.fbReq = fbReq;
     }
 
@@ -54,14 +67,6 @@ public class DataToSellVehicleServiceListener extends ValueEventListenerWithType
 
     public void setVehicleService(VehicleService vehicleService) {
         this.vehicleService = vehicleService;
-    }
-
-    public Bus getBus() {
-        return bus;
-    }
-
-    public void setBus(Bus bus) {
-        this.bus = bus;
     }
 
     public AuthUser getAuthUser() {

@@ -1,11 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.brno.candg.ttdmmo.model;
 
 /**
+ * This entity represents message.
  *
  * @author lastuvka
  */
@@ -27,11 +23,6 @@ public class Message {
         return xy;
     }
 
-    @Override
-    public String toString() {
-        return "Message{" + "text=" + text + ", user_id=" + user_id + ", xy=" + xy + '}';
-    }
-
     public void setText(String text) {
         this.text = text;
     }
@@ -42,6 +33,11 @@ public class Message {
 
     public void setXy(String xy) {
         this.xy = xy;
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" + "text=" + text + ", user_id=" + user_id + ", xy=" + xy + '}';
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * This entity represents map field.
  *
  * @author lastuvka
  */
@@ -12,9 +13,32 @@ public class MapField {
     private String type;
     private int x;
     private int y;
-    private Object obj;
+    private String owner_id;
+    private String city;
+    private Map<String, Boolean> paths = new HashMap<String, Boolean>();
 
-    public MapField() {
+    public Map<String, Boolean> getPaths() {
+        return paths;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setPaths(Map<String, Boolean> paths) {
+        this.paths = paths;
+    }
+
+    public String getOwner_id() {
+        return owner_id;
+    }
+
+    public void setOwner_id(String owner_id) {
+        this.owner_id = owner_id;
     }
 
     public String getType() {
@@ -33,19 +57,19 @@ public class MapField {
         return y;
     }
 
-    public Object getObj() {
-        return obj;
+    public void setX(int x) {
+        this.x = x;
     }
 
-    public void setObj(Object obj) {
-        this.obj = obj;
+    public void setY(int y) {
+        this.y = y;
     }
 
     public static String indexFromXY(int x, int y) {
         return x + ":" + y;
     }
 
-    public static Map<String, Object> MapFromXY(int x, int y) {
+    public static Map<String, Object> mapFromXY(int x, int y) {
         Map<String, Object> updates = new HashMap<String, Object>();
         updates.put("x", x);
         updates.put("y", y);
@@ -80,7 +104,7 @@ public class MapField {
 
     @Override
     public String toString() {
-        return "MapField{" + "type=" + type + ", x=" + x + ", y=" + y + ", objects=" + obj + '}';
+        return "MapField{" + "type=" + type + ", x=" + x + ", y=" + y + ", owner_id=" + owner_id + ", city=" + city + ", paths=" + paths + '}';
     }
 
 }

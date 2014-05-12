@@ -5,7 +5,7 @@ angular.module('myApp.config', [])
 
         // version of this seed app is compatible with angularFire 0.6
         // see tags for other versions: https://github.com/firebase/angularFire-seed/tags
-        .constant('version', '0.6')
+        .constant('version', '1.0')
 
         // where to redirect users if they need to authenticate (see module.routeSecurity)
         .constant('loginRedirectPath', '/')
@@ -14,7 +14,7 @@ angular.module('myApp.config', [])
         //  .constant('FBURL', 'https://INSTANCE.firebaseio.com')
 
         //you can use this one to try out a demo of the seed
-        .constant('FBURL', 'https://ttdmmo.firebaseio.com/');
+        .constant('FBURL', FbRef.refD);
 
 
 /*********************

@@ -1,19 +1,15 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.brno.candg.ttdmmo.backend.dao.impl;
 
 import com.firebase.client.Firebase;
+import com.firebase.client.ValueEventListener;
 import cz.brno.candg.ttdmmo.backend.dao.MessageDao;
-import cz.brno.candg.ttdmmo.backend.firebase.listeners.ValueEventListenerWithType;
 import cz.brno.candg.ttdmmo.constants.FbRef;
 import cz.brno.candg.ttdmmo.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Firebase DAO implementation User entities.
  *
  * @author lastuvka
  */
@@ -21,15 +17,7 @@ public class MessageDaoFbImpl implements MessageDao {
 
     final static Logger log = LoggerFactory.getLogger(MessageDaoFbImpl.class);
 
-    private final Firebase ref = new Firebase(FbRef.ref + "messages");
-
-    private static int cislo = 0;
-
-    // injected from Spring
-    public MessageDaoFbImpl() {
-        log.info("Inicializace MessageDaoFbImpl" + cislo);
-        cislo++;
-    }
+    private final Firebase ref = new Firebase(FbRef.refD + "messages");
 
     @Override
     public String create(Message entity) {
@@ -41,14 +29,15 @@ public class MessageDaoFbImpl implements MessageDao {
     }
 
     @Override
-    public void get(String id, ValueEventListenerWithType valueEventListener) {
+    public void get(String id, ValueEventListener valueEventListener) {
         Firebase childRef = ref.child(id);
         childRef.addListenerForSingleValueEvent(valueEventListener);
     }
 
     @Override
     public void update(Message entity) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Firebase childRef = ref.child(entity.getUser_id());
+        childRef.setValue(entity);
     }
 
     @Override

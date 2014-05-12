@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.brno.candg.ttdmmo.backend.firebase;
 
 import com.firebase.client.DataSnapshot;
@@ -15,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Management of Firebase server time
  *
  * @author lastuvka
  */
@@ -22,15 +18,12 @@ import org.slf4j.LoggerFactory;
 public class FbServerTime {
 
     final static Logger log = LoggerFactory.getLogger(FbServerTime.class);
-    private static int cislo = 0;
 
     private final ValueEventListener childEventListener;
-    private Firebase offsetRef = new Firebase(FbRef.ref + ".info/serverTimeOffset");
+    private final Firebase offsetRef = new Firebase(FbRef.ref + ".info/serverTimeOffset");
     private double serverOffset = 0;
 
     public FbServerTime() {
-        cislo++;
-        log.info("Inicializace ServerTime: " + cislo);
         childEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -58,6 +51,11 @@ public class FbServerTime {
 
     public double getServerTime() {
         double estimatedServerTimeMs = System.currentTimeMillis() + serverOffset;
+        return estimatedServerTimeMs;
+    }
+
+    public double getFutureTime() {
+        double estimatedServerTimeMs = System.currentTimeMillis() + serverOffset + 1000 * 60 * 60 * 24 * 365 * 10;
         return estimatedServerTimeMs;
     }
 }

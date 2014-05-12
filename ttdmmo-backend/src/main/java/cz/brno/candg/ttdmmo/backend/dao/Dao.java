@@ -1,35 +1,44 @@
 package cz.brno.candg.ttdmmo.backend.dao;
 
-import cz.brno.candg.ttdmmo.backend.firebase.listeners.ValueEventListenerWithType;
+import com.firebase.client.ValueEventListener;
 
 /**
  * DAO super-interface Extending interfaces will inherit basic CRUD operations
  * on their entities.
  *
- * @author Martin Pasko (smartly23)
+ * @author Lastuvka
  *
  * @param <T> Generic type of entity
  */
 public interface Dao<T> {
 
-    /*  Create the entity
-     * @throws IllegalArgumentException if parameter is null or invalid
+    /**
+     * Create the entity
+     *
+     * @param entity
+     * @return
      */
     String create(T entity);
 
-    /*  Get the data to the valueEventListener
-     * @throws IllegalArgumentException if parameter is null or invalid
+    /**
+     * Get the data to the valueEventListener
+     *
+     * @param id
+     * @param valueEventListener
      */
-    void get(String id, ValueEventListenerWithType valueEventListener);
+    void get(String id, ValueEventListener valueEventListener);
 
-    /* Update the entity
-     * @throws IllegalArgumentException if parameter is null, invalid or non-existent in the DB
+    /**
+     * Update the entity
+     *
+     * @param entity
      */
     void update(T entity);
 
-    /* Remove the entity
-     * @throws IllegalArgumentException if parameter is null or invalid. Does not throw this exception if
-     * parameter is valid but given entity is nonexistent. 
+    /**
+     * Remove the entity
+     *
+     * @param id
      */
     void remove(String id);
 }

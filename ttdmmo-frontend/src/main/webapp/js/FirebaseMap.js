@@ -1,23 +1,19 @@
-var mapRef = new Firebase(FbRef.ref + 'map');
-var cityRef = new Firebase(FbRef.ref + 'cities');
-var mapCityRef = Firebase.util.join(
-        {
-            ref: mapRef,
-            keyMap: {x: 'x', y: 'y', obj: 'obj', type: 'type'}
-        },
-{
-    ref: cityRef,
-    keyMap: {name: 'city', people: 'people'}
-}
-);
+var mapCityRef = new Firebase(FbRef.refD + 'map');
+var cityRef = new Firebase(FbRef.refD + 'cities');
 
-
+/**
+ * Diff. of arrays
+ * 
+ * @param {type} a
+ * @returns {Array.prototype@call;filter}
+ */
 Array.prototype.diff = function(a) {
     return this.filter(function(i) {
         return !(a.indexOf(i) > -1);
     });
 };
 /*
+ * From coords x,y to index
  * 
  * @param {type} x
  * @param {type} y
@@ -27,14 +23,29 @@ Array.prototype.diff = function(a) {
 function indexFromXY(x, y) {
     return x + ":" + y;
 }
+/**
+ * coords x, y plus index
+ * 
+ * @param {type} x
+ * @param {type} y
+ * @param {type} index
+ * @returns {String} index 
+ */
 function XYPlusIndex(x, y, index) {
     var coords = index.split(":");
     return indexFromXY(x + parseInt(coords[0]), y + parseInt(coords[1]));
 }
+/**
+ * coords x,y from index
+ * @param {type} index
+ * @returns {XYFromIndex.Anonym$0} object with x,y
+ */
+
 function XYFromIndex(index) {
     var coords = index.split(":");
     return {x: parseInt(coords[0]), y: parseInt(coords[1])};
 }
+
 function markField(index) {
     var xy = XYFromIndex(index);
     var sheet1 = new sheetengine.Sheet({x: 0, y: 0, z: 0}, {alphaD: 270, betaD: 0, gammaD: 0}, {w: 20, h: 20});
@@ -42,170 +53,117 @@ function markField(index) {
     sheet1.context.fillRect(0, 0, 20, 20);
     // sheetengine.drawObjectContour = true;
     return  new sheetengine.SheetObject({x: xy.x * sheetengine.scene.tilewidth, y: xy.y * sheetengine.scene.tilewidth, z: 0}, {alphaD: 0, betaD: 0, gammaD: 0}, [sheet1], {w: 30, h: 30, relu: 15, relv: 15});
-    /*  var a = 120 / 12;
-     var b = 120 / 4;
-     var h = 12;
-     var windowColor = '#0000dd';
-     var busColor = '#B8EFF7';
-     
-     // user definition for animation with sheet motion
-     var bok = new this.sheetengine.Sheet({x: 0, y: -a / 2, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 0}, {w: b, h: h});
-     var ctx = bok.context;
-     // head
-     ctx.fillStyle = '#3d1e14';
-     ctx.fillRect(0, 0, 30, 14);
-     //okna
-     ctx.fillStyle = '#0000dd';
-     ctx.fillRect(5, 2, 20, 4);
-     
-     var bok2 = new this.sheetengine.Sheet({x: 0, y: a / 2, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 0}, {w: 30, h: h});
-     var ctx2 = bok2.context;
-     // body
-     ctx2.fillStyle = '#3d1e14';
-     ctx2.fillRect(0, 0, 30, 14);
-     ctx2.fillStyle = '#0000dd';
-     ctx2.fillRect(5, 2, 20, 4);
-     
-     var top = new this.sheetengine.Sheet({x: -b / 2, y: 0, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 90}, {w: a, h: h});
-     var ctx4 = top.context;
-     // head
-     ctx4.fillStyle = '#3d1e14';
-     ctx4.fillRect(0, 0, 10, 14);
-     ctx4.fillStyle = '#0000dd';
-     ctx4.fillRect(1, 2, 5, 5);
-     
-     var strecha = new this.sheetengine.Sheet({x: 0, y: 0, z: h}, {alphaD: 90, betaD: 0, gammaD: 0}, {w: b, h: a});
-     var ctx5 = strecha.context;
-     // head
-     ctx5.fillStyle = '#3d1e14';
-     ctx5.fillRect(0, 0, 30, 14);
-     
-     var bottom = new this.sheetengine.Sheet({x: b / 2, y: 0, z: h / 2}, {alphaD: 0, betaD: 0, gammaD: 90}, {w: a, h: h});
-     var ctx3 = bottom.context;
-     // head
-     ctx3.fillStyle = '#3d1e14';
-     ctx3.fillRect(0, 0, 10, 14);
-     // define user object
-     sheetengine.drawObjectContour = true;
-     return new sheetengine.SheetObject({x: xy.x * sheetengine.scene.tilewidth, y: xy.y * sheetengine.scene.tilewidth, z: 0}, {alphaD: 0, betaD: 0, gammaD: 0}, [strecha, bok, bok2, top, bottom], {w: 60, h: 60, relu: 30, relv: 30});
-     */
+
 }
+/**
+ * is defined
+ * 
+ * @param {type} game
+ * @param {type} index
+ * @returns {Boolean}
+ */
 function existField(game, index) {
     return game.firebaseMap.map[index] !== undefined && game.firebaseMap.map[index].sheet !== undefined;
 }
-function isRoad(game, index) {
-    return (game.firebaseMap.map[index].type === 'A' || game.firebaseMap.map[index].type === 'A2');
-}
-function isCrossRoad(game, index) {
-    return game.firebaseMap.map[index].type === 'A3';
-}
-function isFieldFree(game, index) {
-    return (game.firebaseMap.map[index].type === 'B');
+/**
+ * Is path on given field
+ * 
+ * @param {type} game
+ * @param {type} index
+ * @returns {Boolean}
+ */
+function isPathOnField(game, index) {
+    return game.firebaseMap.map[index] !== undefined && game.firebaseMap.map[index].path !== undefined;
 }
 /**
+ * Is at map field road
  * 
- * @param {int} x 
- * number of x points (-x,x)
- * @param {int} y
- * number of y points (-y,y)
- * 
- * @returns {void}
+ * @param {type} game
+ * @param {type} index
+ * @returns {Boolean}
  */
-function generateMap(x, y) {
-    for (i = -x; i <= x; i++) {
-        for (z = -y; z <= y; z++) {
-            if (z === 0)
-                pom = 'A';
-            else
-                pom = 'B';
-            mapRef.child(indexFromXY(i, z)).set({x: (i), y: (z), type: pom});
-        }
-    }
+function isRoad(game, index) {
+    return (game.firebaseMap.map[index].type.substring(0, 2) === MapTypes.road.direct);
+}
+/**
+ * is station
+ * 
+ * @param {type} game
+ * @param {type} index
+ * @returns {Boolean}
+ */
+function isStation(game, index) {
+    return (game.firebaseMap.map[index].type.substring(0, 2) === MapTypes.building.stop.stop);
+}
+/**
+ * is crossroad
+ * 
+ * @param {type} game
+ * @param {type} index
+ * @returns {Boolean}
+ */
+function isCrossRoad(game, index) {
+    return game.firebaseMap.map[index].type === MapTypes.road.cross;
+}
+/**
+ * free field
+ * 
+ * @param {type} game
+ * @param {type} index
+ * @returns {Boolean}
+ */
+function isFieldFree(game, index) {
+    return (game.firebaseMap.map[index].type === MapTypes.nothing);
 }
 
-function createCity(x, y) {
-    //  for (i = -x; i <= x; i=) {
-    //    for (z = -y; z <= y; z++) {
-
-    q = x + 0;
-    w = y + 0;
-    mapRef.child(indexFromXY(q, w)).set({x: (q), y: (w), type: 'A3'});
-
-    q = x - 1;
-    w = y + 0;
-    mapRef.child(indexFromXY(q, w)).set({x: (q), y: (w), type: 'A'});
-    q = x + 1;
-    w = y + 0;
-    mapRef.child(indexFromXY(q, w)).set({x: (q), y: (w), type: 'A'});
-
-    q = x + 0;
-    w = y + 1;
-    mapRef.child(indexFromXY(q, w)).set({x: (q), y: (w), type: 'B1'});
-    q = x + 0;
-    w = y - 1;
-    mapRef.child(indexFromXY(q, w)).set({x: (q), y: (w), type: 'B3'});
-    q = x - 1;
-    w = y - 1;
-    mapRef.child(indexFromXY(q, w)).set({x: (q), y: (w), type: 'B0'});
-    q = x + 3;
-    w = y + 2;
-    mapRef.child(indexFromXY(q, w)).set({x: (q), y: (w), type: 'BF'});
-    q = x - 1;
-    w = y + 1;
-    mapRef.child(indexFromXY(q, w)).set({x: (q), y: (w), type: 'B2'});
-
-}
-function createCities(n) {
-    fields = 10;
-    city = [["Kvikalkov", "Mordor", "Rohlenka", "Kraj", "Gondor"],
-        ["Brno", "Praha", "London", "Zagreb", "Tvarozna Lhota"],
-        ["Madrid", "Berlin", "Bern", "Sochi", "Vancouver"],
-        ["Centuria", "Sandwich", "Machackala", "Lexibook", "Patagonie"],
-        ["Reckovice", "Ceska", "Sydney", "Koln", "Sanghai"]];
-    padding = fields / n;
-    margin = padding / 2;
-    for (i = 0; i < n; i++) {
-        for (z = 0; z < n; z++) {
-            x = (margin + padding * i) - fields / 2;
-            y = (margin + padding * z) - fields / 2;
-            //createCity(x, y);
-            cityRef.child(indexFromXY(x, y)).set({people: 200, xy: indexFromXY(x, y), name: city[i][z]});
-        }
-    }
-}
-
-
-function SheetengineField(basesheet, centerp, type, obj, building) {
-    console.log('SheetengineField instantiated');
+/**
+ * SheetengineField
+ * 
+ * @param {type} basesheet
+ * @param {type} centerp
+ * @param {type} type
+ * @param {type} path
+ * @param {type} building
+ * @param {type} owner
+ * @returns {SheetengineField}
+ */
+function SheetengineField(basesheet, centerp, type, path, building, owner) {
+//    console.log('SheetengineField instantiated');
     var self = this;
     this.buses = [];
-    this.obj = obj;
+    this.path = path;
     this.type = type;
     this.centerp = centerp;
     this.sheet = basesheet;
     this.building = building;
+    this.owner = owner;
 }
 
-
+/**
+ * SheetengineFieldFactory
+ * 
+ * @param {type} sheetengine
+ * @returns {SheetengineFieldFactory}
+ */
 function SheetengineFieldFactory(sheetengine) {
     console.log('SheetengineFieldFactory instantiated');
     var self = this;
-    this.color = '#5D7E36';
+    this.color = '#5D7E36';//default field bgcolor
     this.sheetengine = sheetengine;
     this.map = null;
+    this.vehicles = null;
     this.busFactory = null;
     this.buildingFactory = null;
-
-    this.loadObjects = function(obj) {
-        if (obj.buses !== undefined) {
-            console.debug(obj.buses);
-            for (var bus in obj.buses) {
-                //console.debug(bus);
-                this.busFactory.loadBus(bus);
+    this.loadVehicle = function(pathes) {
+        if (pathes !== undefined) {
+            for (var path in pathes) {
+                if (this.vehicles[path] === undefined) {
+                    this.vehicles[path] = 'load';
+                    this.busFactory.loadBus(path);
+                }
             }
         }
     };
-
     /*
      * 
      *  @param {type} field
@@ -215,72 +173,86 @@ function SheetengineFieldFactory(sheetengine) {
      * 
      * @returns {void}
      */
-    this.destroyedFieldService = function(field, sheet, obj, all) {
+    this.destroyedFieldService = function(field, sheet, building, all) {
         //alert('Override this function.');
         var index = indexFromXY(field.x, field.y);
         if (this.map[index] !== undefined) {
             if (this.map[index].sheet !== undefined && sheet) {
                 this.map[index].sheet.destroy();
-                console.log('map sheet is removed ' + field.x + ":" + field.y);
+                //console.log('map sheet is removed ' + field.x + ":" + field.y);
             }
-            if (obj) {
-                var len = this.map[index].buses.length;
-                while (len--) {
-                    this.map[index].buses[len].sheet.destroy();
-                    this.map[index].buses.splice(len, 1)
-                }
-                console.log('map obj is removed ' + field.x + ":" + field.y);
+            if (building && this.map[index].building !== undefined && this.map[index].building.sheet !== undefined) {
+
+                this.map[index].building.sheet.destroy();
+                // console.log('map sheet is removed ' + field.x + ":" + field.y);
             }
             if (all) {
                 delete this.map[index];
-                console.log('Field is removed ' + field.x + ":" + field.y);
+                //console.log('Field is removed ' + field.x + ":" + field.y);
             }
 
 
         }
     };
+
     /**
+     * data from callback
      * 
-     * @param {snapshot.val()} data 
-     * data from fb
-     * 
-     * @returns {void}
+     * @param {type} index
+     * @param {type} data
+     * @returns {undefined}
      */
-    this.loadedFieldService = function(data) {
+    this.loadedFieldService = function(index, data) {
         //alert('Override this function.');
-        var index = indexFromXY(data.x, data.y);
         if (this.map[index] !== undefined) {
+            this.map[index].path = data.paths;
             if (this.map[index].type !== data.type) {
                 this.setFieldCanvas(data.type, this.map[index].sheet);
+                this.destroyedFieldService({x: data.x, y: data.y}, 0, true, 0);
+                var building = this.setFieldBuilding(data.type, this.map[index].centerp);
+                this.map[index].building = building;
                 this.map[index].type = data.type;
                 this.sheetengine.dirty = 1;
                 console.log("dirty");
             }
             else {
-                this.destroyedFieldService({x: data.x, y: data.y}, 0, true, 0);
-                if (data.obj !== undefined)
-                    this.loadObjects(data.obj);
-                if (data.city !== undefined)
+                /*prepare to show people count*/
+                if (data.city !== undefined) {
+                    this.destroyedFieldService({x: data.x, y: data.y}, 0, true, 0);
                     this.map[index].building = this.buildingFactory.newTownName(this.map[index].centerp, data.city, data.people);
+                }
             }
+            if (data.paths !== undefined)
+                this.loadVehicle(data.paths);
+            if (data.owner_id !== undefined)
+                this.map[index].owner = data.owner_id;
         }
         else {
             var sheetengineField = this.newField(data);
             this.map[index] = sheetengineField;
-            if (data.obj !== undefined)
-                this.loadObjects(data.obj);
+            if (data.paths !== undefined)
+                this.loadVehicle(data.paths);
             if (data.city !== undefined)
                 this.map[index].building = this.buildingFactory.newTownName(this.map[index].centerp, data.city, data.people);
-
-            console.log('Field is load ' + data.x + ":" + data.y);
+            //        console.log('Field is load ' + data.x + ":" + data.y);
         }
 
     };
+    /**
+     * Callback for field
+     * 
+     * @param {type} snapshot
+     * @returns {undefined}
+     */
     this.loadFieldCallback = function(snapshot) {
-        if (snapshot.val() === null) {
-            console.log('Field can be loaded.');
+        if (snapshot.val() === null || snapshot.name() === null) {
+            console.log('Field can not be loaded.');
         } else {
-            self.loadedFieldService(snapshot.val());
+            var data = snapshot.val();
+            var xy = XYFromIndex(snapshot.name());
+            data.x = xy.x;
+            data.y = xy.y;
+            self.loadedFieldService(snapshot.name(), data);
         }
     };
 }
@@ -297,8 +269,12 @@ SheetengineFieldFactory.prototype = {
     setMap: function(map)
     {
         this.map = map;
-        this.setBusFactory(new BusFactory(this.sheetengine, this.map));
         this.setBuildingFactory(new BuildingFactory(this.sheetengine, this.map));
+    },
+    setVehicles: function(vehicles)
+    {
+        this.vehicles = vehicles;
+        this.setBusFactory(new BusFactory(this.sheetengine, this.map, this.vehicles));
     },
     newField: function(data)
     {
@@ -310,48 +286,60 @@ SheetengineFieldFactory.prototype = {
         basesheet.color = color;
         this.setFieldCanvas(data.type, basesheet);
         var building = this.setFieldBuilding(data.type, centerp);
-        result = new SheetengineField(basesheet, centerp, data.type, data.obj, building);
+        result = new SheetengineField(basesheet, centerp, data.type, data.paths, building, data.owner_id);
         this.sheetengine.dirty = 1;
         return result;
     },
     setFieldCanvas: function(type, basesheet) {
-        if (type == 'A')
+        if (type === MapTypes.road.left)
             basesheet.img = imgRoad;
-        else if (type == 'A2')
+        else if (type === MapTypes.road.right)
             basesheet.img = imgRoad2;
-        else if (type == 'A3')
+        else if (type === MapTypes.road.cross)
             basesheet.img = imgCross;
-        else if (type == 'B1' || type == 'B3')
+        else if (type === MapTypes.building.stop.Warehouse || type === MapTypes.building.mainStation)
             basesheet.img = imgDepo;
-        else if (type == 'W')
+        else if (type === 'W')
             basesheet.img = imgZas;
-        else if (type == 'BF')
+        else if (type === MapTypes.building.stop.sources.farm || type === MapTypes.building.stop.sources.wood)
             basesheet.img = imgFarm;
+        else if (type === MapTypes.building.field.farm)
+            basesheet.img = imgFarmField;
+        else if (type === MapTypes.building.field.wood)
+            basesheet.img = imgGrass;
         else
             basesheet.img = imgGrass;
     },
     setFieldBuilding: function(type, centerp) {
-        if (type == 'B0') {
+        if (type === MapTypes.building.cityHall) {
             return this.buildingFactory.newTownCenter(centerp);
         }
-        else if (type == 'B1') {
+        else if (type === MapTypes.building.mainStation) {
             return this.buildingFactory.newDepo(centerp);
         }
-        else if (type == 'B2') {
-            return this.buildingFactory.newHouse(centerp);
+        else if (type.slice(0, MapTypes.building.home.home.length) === MapTypes.building.home.home) {
+            level = parseInt(type.slice(MapTypes.building.home.home.length, type.length));
+            return this.buildingFactory.newHouse(centerp, level);
         }
-        else if (type == 'B3') {
+        else if (type === MapTypes.building.home.skyScraper) {
+            return this.buildingFactory.newHouse(centerp, 4);
+        }
+        else if (type === MapTypes.building.stop.Warehouse) {
             return this.buildingFactory.newWarehouse(centerp);
         }
-        else if (type == 'BF') {
+        else if (type === MapTypes.building.stop.sources.farm) {
             return this.buildingFactory.newFarm(centerp);
         }
+        else if (type === MapTypes.building.stop.sources.wood) {
+            return this.buildingFactory.newWood(centerp);
+        }
+        else if (type === MapTypes.building.field.wood) {
+            return this.buildingFactory.newTree(centerp);
+        }
         else
-            return null;
+            return;
     }
 };
-
-
 function FirebaseMap() {
     console.log('FirebaseMap instantiated');
     var self = this;
@@ -359,6 +347,7 @@ function FirebaseMap() {
     this.cached = 0;
     this.level = 2;
     this.map = [];
+    this.vehicles = [];
 }
 
 FirebaseMap.prototype = {
@@ -367,12 +356,19 @@ FirebaseMap.prototype = {
     {
         var fieldsToLoad = this.getFieldsAround(centerField);
         this.loadFields(fieldsToLoad);
-
+    },
+    reInit: function(centerField)
+    {
+        var fieldsToLoad = this.getFieldsAround(centerField);
+        this.destroyFields(fieldsToLoad);
+        var fieldsToLoad = this.getFieldsAround(centerField);
+        this.loadFields(fieldsToLoad);
     },
     setFieldFactory: function(factory)
     {
         this.fieldFactory = factory;
         this.fieldFactory.setMap(this.map);
+        this.fieldFactory.setVehicles(this.vehicles);
     },
     setLevel: function(level)
     {
@@ -391,7 +387,6 @@ FirebaseMap.prototype = {
         var maxX = centerField.x + this.level;
         var x = minX;
         var pom = 0;
-
         while (x <= maxX) {
             var miniY = centerField.y - pom;
             var maxiY = centerField.y + pom;
@@ -407,13 +402,12 @@ FirebaseMap.prototype = {
             x++;
         }
         return result;
-
     },
     destroyField: function(field)
     {
         var index = indexFromXY(field.x, field.y);
         if (this.cached === 0) {
-            console.log("REM [x" + field.x + ",y" + field.y + "]");
+            //console.log("REM [x" + field.x + ",y" + field.y + "]");
             mapCityRef.child(index).off('value', this.loadFieldCallback);
             this.fieldFactory.destroyedFieldService(field, true, true, true);
         }
@@ -429,7 +423,7 @@ FirebaseMap.prototype = {
     loadField: function(field)
     {
         var index = indexFromXY(field.x, field.y);
-        console.log("INS [x" + field.x + ",y" + field.y + "]");
+        //console.log("INS [x" + field.x + ",y" + field.y + "]");
         if (this.cached === 0)
             mapCityRef.child(index).on('value', this.fieldFactory.loadFieldCallback);
         else if (this.map[index] === undefined)
@@ -438,7 +432,6 @@ FirebaseMap.prototype = {
     loadFields: function(fields)
     {
         var len = fields.length;
-
         while (len--) {
             var coords = XYFromIndex(fields[len]);
             this.loadField({x: coords.x, y: coords.y});

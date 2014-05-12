@@ -1,10 +1,10 @@
 'use strict';
-
 /* Controllers */
 
-angular.module('myApp.controllers', [])
-        .controller('HomeCtrl', ['$scope', 'syncData', function($scope, syncData) {
+angular.module('myApp.controllers', ['ui.bootstrap'])
+        .controller('HomeCtrl', ['$scope', '$firebase', 'syncData', function($scope, $firebase, syncData) {
                 //syncData('syncedValue').$bind($scope, 'syncedValue');
+                $scope.rank = $firebase(new Firebase(FbRef.refD + 'ranking').limit(5));
             }])
         .controller('myUnlogCntrl', ['$scope', 'loginService', 'syncData', '$location', function($scope, loginService, syncData, $location) {
                 $scope.email = null;
@@ -39,81 +39,120 @@ angular.module('myApp.controllers', [])
                 $scope.logout = function() {
                     loginService.logout();
                 };
-
-
             }])
 
-        .controller('MapCtrl', ['$scope', '$firebase', function($scope, $firebase) {
-                $scope.cities = [];
-                $scope.cityMap = false;
+        .controller('MapCtrl', ['$scope', '$firebase', 'syncData', '$timeout', function($scope, $firebase, syncData, $timeout) {
+                var user_id = $scope.auth.user.uid;
+                var fbRef = {
+                    build: new Firebase(FbRef.refQ + 'build'),
+                    pathVehicle: new Firebase(FbRef.refQ + 'pathVehicle'),
+                    newVehicle: new Firebase(FbRef.refQ + 'newVehicle'),
+                    sellVehicle: new Firebase(FbRef.refQ + 'sellVehicle'),
+                    user: new Firebase(FbRef.refD + 'users/' + user_id),
+                    manual: new Firebase(FbRef.refD + 'manual/' + user_id),
+                    vehicles: new Firebase(FbRef.refD + 'vehicles'),
+                    cities: new Firebase(FbRef.refD + 'cities'),
+                    rank: new Firebase(FbRef.refD + 'ranking'),
+                    messages: new Firebase(FbRef.refD + 'messages/' + user_id)
+                };
+                $scope.build = '';
+                $scope.stops = {};
+                $scope.path = {};
+                $scope.vehicleTypes = VehicleTypes;
+                $scope.vehicle = {type: 0, selection: "default", name: "Vehicle 1", count: 1};
+                syncData(['manual', user_id]).$bind($scope, 'manualStep').then(function() {
+                    $timeout(function() {
+                        $scope.manual = Manual[$scope.manualStep];
+                    });
+                });
 
-                var game = new Game();
+                $scope.nextStep = function() {
+                    if ($scope.manualStep === 3) {
+                        $scope.setBuild('RDL');
+                    }
+                    else if ($scope.manualStep === 4) {
+                        var index = XYPlusIndex(2, 0, $scope.authUser.position);
+                        $scope.mouseUP(null, index);
+                    }
+                    else if ($scope.manualStep === 5) {
+                        $scope.setBuild('RC');
+                    }
+                    else if ($scope.manualStep === 6) {
+                        var index = XYPlusIndex(3, 0, $scope.authUser.position);
+                        $scope.mouseUP(null, index);
+                    }
+                    else if ($scope.manualStep === 7) {
+                        $scope.setBuild('RDR');
+                    }
+                    else if ($scope.manualStep === 8) {
+                        var index = XYPlusIndex(3, 1, $scope.authUser.position);
+                        $scope.mouseUP(null, index);
+                    }
+                    else if ($scope.manualStep === 10) {
+                        $scope.vehicle.selection = 1;
+                    }
+                    else if ($scope.manualStep === 11) {
+                        $scope.newVehicle($scope.vehicle.name, $scope.vehicle.type);
+                    }
+                    else if ($scope.manualStep === 12) {
+                        var keys = $scope.userBuses.$getIndex();
+                        keys.forEach(function(key, i) {
+                            if (i === 0)
+                                $scope.newPath($scope.userBuses[key].vehicle_id, $scope.userBuses[key].type);
+                        });
+                    }
+                    else if ($scope.manualStep === 13) {
+                        $scope.setPathDirection('right');
+                    }
+                    else if ($scope.manualStep === 14) {
+                        $scope.setPathDirection('down');
+                    }
+                    else if ($scope.manualStep === 15) {
+                        $scope.setPath();
+                    }
+                    $scope.manualStep++;
+                    $scope.manual = Manual[$scope.manualStep];
+                };
+
+                $scope.draganddrop = {mousePressed: false, move: false, start: {x: 0, y: 0}};
+                $scope.draganddropcity = {mousePressed: false, move: false, start: {x: 0, y: 0}};
+                $scope.cities = {};
+                $scope.showCityMap = false;
+                var game = traman;
                 $scope.station = {x: 0, y: 1};
                 $scope.warehouse = {x: 0, y: -1};
                 $scope.warehouseRoad = {x: 0, y: 0};
-
-                var messRef = new Firebase(FbRef.ref + 'messages/' + $scope.auth.user.uid);
+                var messRef = fbRef.messages;
                 messRef.on('child_added', function(snapshot) {
                     var userName = snapshot.name(), userData = snapshot.val();
                     bootbox.alert(userData.text);
                     if (userData.xy) {
+                        if (game.firebaseMap.map[userData.xy] !== undefined) {
+                            game.firebaseMap.fieldFactory.setFieldCanvas(game.firebaseMap.map[userData.xy].type, game.firebaseMap.map[userData.xy].sheet);
+                        }
                         sheetengine.dirty = 1;
                     }
                     messRef.child(snapshot.name()).remove();
                 });
 
-                $scope.changeFunction = function(user_id) {
-                    if (user_id != "") {
-                        var ref2 = new Firebase(FbRef.ref + 'users/' + user_id);
-                        $scope.authUser = $firebase(ref2);
-                        $scope.userBuses = [];
-                        /*$scope.authUser.$on("loaded", function(value) {
-                         console.debug(value);
-                         console.log("ehehe");
-                         if (value) {
-                         for (var bus in value.buses) {
-                         var ref3 = new Firebase(FbRef.ref + 'buses/' + bus);
-                         $scope.userBuses.push($firebase(ref3));
-                         }
-                         //game.init(XYFromIndex(value.position));
-                         }
-                         });*/
-                        $scope.authUser.$on('change', function() {
-                            var authUser = $scope.authUser;
-                            console.debug(authUser);
-                            if (authUser) {
-                                $scope.userBuses = [];
-                                for (var bus in authUser.buses) {
-                                    var ref3 = new Firebase(FbRef.ref + 'buses/' + bus);
-                                    $scope.userBuses.push($firebase(ref3));
-                                }
-                                if (!game.initialized && authUser.position) {
-                                    game.init(XYFromIndex(authUser.position));
-
-                                    var cityRef = new Firebase(FbRef.ref + 'cities/');
-                                    cityRef.on('child_added', function(snapshot) {
-                                        var userName = snapshot.name(), userData = snapshot.val();
-                                        if (userData) {
-                                            $scope.cities.push(userData);
-                                            if (userData.xy === $scope.authUser.position)
-                                                game.initCityMap(userData, true);
-                                            else
-                                                game.initCityMap(userData);
-                                            sheetengine2.dirty = 1;
-                                        }
-                                    });
-                                }
-                            }
-
-                        });
+                $scope.city = {};
+                $scope.city.people = 50;
+                $scope.city.food = 0;
+                $scope.city.wood = 0;
+                $scope.authUser = $firebase(fbRef.user);
+                $scope.authUser.$on("loaded", function() {
+                    console.debug($scope.authUser.position);
+                    if ($scope.authUser.position) {
+                        game.init(XYFromIndex($scope.authUser.position));
+                        $scope.city = $firebase(fbRef.cities.child($scope.authUser.position));
                     }
-                };
-                $scope.fbRef = {
-                    build: new Firebase(FbRef.refQ + 'build'),
-                    pathVehicle: new Firebase(FbRef.refQ + 'pathVehicle'),
-                    newVehicle: new Firebase(FbRef.refQ + 'newVehicle'),
-                    sellVehicle: new Firebase(FbRef.refQ + 'sellVehicle')
-                };
+                });
+                var ref = new Firebase.util.intersection(fbRef.user.child('vehicles'), fbRef.vehicles);
+
+                $scope.userBuses = $firebase(ref);
+                $scope.rank = $firebase(fbRef.rank.limit(10));
+
+
                 $scope.dragmousedown = function($event) {
                     if (game.initialized) {
                         var pxy = game.clickPosition($event.clientX, $event.clientY);
@@ -127,13 +166,16 @@ angular.module('myApp.controllers', [])
                         position = vPosition;
                     else
                         position = XYFromIndex($scope.authUser.position);
+
                     var camera = {x: position.x * game.w, y: position.y * game.w, z: position.z * game.w};
+                    console.log(camera);
                     game.moveViewPoint(camera);
                 };
                 $scope.dragdrop = function($event) {
                     if (game.initialized) {
                         var pxy = game.clickPosition($event.clientX, $event.clientY);
                         if ($scope.draganddrop.mousePressed) {
+                            $scope.draganddrop.move = true;
                             var self = game;
                             var targetp = {
                                 x: self.camera.x + ($scope.draganddrop.start.x - pxy.x),
@@ -143,87 +185,88 @@ angular.module('myApp.controllers', [])
                         }
                     }
                 };
-
-                $scope.cityMapClick = function($event) {
-                    var pxy = game.clickPosition($event.clientX, $event.clientY, sheetengine2);
-                    var targetp = {
-                        x: (pxy.x / game.cityMap.size),
-                        y: (pxy.y / game.cityMap.size),
-                        z: 0};
-                    $scope.goToCity(targetp);
+                $scope.mouseUP = function($event, vIndex) {
+                    if ($scope.draganddrop.move === false) {
+                        var index = vIndex;
+                        if ($event !== null) {
+                            var pxy = game.clickPosition($event.clientX, $event.clientY);
+                            console.debug(game.objToInsert);
+                            var clickpos = sheetengine.scene.getYardFromPos(pxy);
+                            console.debug(clickpos.relyardx + ',' + clickpos.relyardy);
+                            index = indexFromXY(clickpos.relyardx, clickpos.relyardy);
+                        }
+                        if ($scope.authUser.money > 0 && (game.objToInsert.substring(0, 1) === MapTypes.road.road)) {
+                            if (existField(game, index) && isFieldFree(game, index)) {
+                                var sh = game.firebaseMap.map[index].sheet;
+                                sh.img = imgBuild;
+                                sheetengine.dirty = 1;
+                                fbRef.build.push().setWithPriority({xy: index, user_id: user_id, type: game.objToInsert}, Math.floor((Math.random() * 1000) + 1));
+                            } else {
+                                bootbox.alert("You can build road only on free field. You can use bomb to make field free.");
+                            }
+                        }
+                        else if ($scope.authUser.money > 0 && game.objToInsert === MapTypes.nothing) {
+                            if (existField(game, index) && (isRoad(game, index) || isCrossRoad(game, index)) && !isPathOnField(game, index) && game.firebaseMap.map[index].owner === user_id) {
+                                var sh = game.firebaseMap.map[index].sheet;
+                                sh.img = imgBuild;
+                                sheetengine.dirty = 1;
+                                fbRef.build.push().setWithPriority({xy: index, user_id: user_id, type: game.objToInsert}, Math.floor((Math.random() * 1000) + 1));
+                            } else if (isPathOnField(game, index)) {
+                                bootbox.alert("There is a vehicle path at this road.");
+                            } else
+                                bootbox.alert("You can use bomb only on your own field with road.");
+                        } else if ($scope.authUser.money <= 0 && game.objToInsert != '') {
+                            bootbox.alert("You need more money.");
+                        }
+                    }
+                    $scope.draganddrop.move = false;
+                    $scope.draganddrop.mousePressed = false;
                 };
-                $scope.checkCanvasClick = function($event) {
-                    var pxy = game.clickPosition($event.clientX, $event.clientY);
-                    console.debug(pxy);
-                    console.debug(game.objToInsert);
-                    var clickpos = sheetengine.scene.getYardFromPos(pxy);
-                    console.debug(clickpos.relyardx + ',' + clickpos.relyardy);
-                    var index = indexFromXY(clickpos.relyardx, clickpos.relyardy);
-                    if (game.firebaseMap.map[index].sheet !== undefined) {
-                        //console.debug(game.firebaseMap.map[index].sheet);
-
-                        /*var ctx = sheetengine.context;
-                         ctx.save();
-                         ctx.lineWidth = 1;
-                         ctx.globalAlpha = 0.8;
-                         ctx.strokeStyle = '#FFF';
-                         var ouv = sheetengine.drawing.getPointuv(pxy);
-                         console.debug(ouv);
-                         ctx.strokeRect(Math.round(ouv.u) - 20, Math.round(ouv.v) - 30, 40, 40);
-                         ctx.restore();*/
-                    }
-                    if (game.objToInsert === 'path') {
-
-                        if (game.firebaseMap.map[index].type === "A" || game.firebaseMap.map[index].type === "A2" || game.firebaseMap.map[index].type === "A3") {
-                            var stops = index + "x";
-                            $scope.stops.name = $scope.stops.name + stops;
-                        }
-                        else if (game.firebaseMap.map[index].type === "BF") {
-                            var stops = index + "x" + XYPlusIndex($scope.warehouse.x, $scope.warehouse.y, $scope.authUser.position);
-                            $scope.stops.name = stops;
-                        }
-                    }
-                    if (game.objToInsert === 'stop') {
-                        if (game.firebaseMap.map[index].type === "BF") {
-                            var stops = index + "x" + XYPlusIndex($scope.warehouse.x, $scope.warehouse.y, $scope.authUser.position);
-                            $scope.stops.name = stops;
-                        }
-                    }
-                    else if ($scope.authUser.money > 0 && (game.objToInsert === 'A' || game.objToInsert === 'A2' || game.objToInsert === 'A3')) {
-                        if (existField(game, index) && isFieldFree(game, index)) {
-                            var sh = game.firebaseMap.map[index].sheet;
-                            sh.img = imgBuild;
-                            sheetengine.dirty = 1;
-                            $scope.fbRef.build.push({xy: indexFromXY(clickpos.relyardx, clickpos.relyardy), user_id: $scope.authUser.user_id, type: game.objToInsert})
-                        } else if ($scope.authUser.money <= 0) {
-                            bootbox.alert("You need more money.");
-
-                        } else {
-                            bootbox.alert("You can build road only on free field. You can use bomb to make field free.");
-                        }
-                    }
-                    else if ($scope.authUser.money > 0 && game.objToInsert === 'B') {
-                        if (existField(game, index) && (isRoad(game, index) || isCrossRoad(game, index))) {
-                            var sh = game.firebaseMap.map[index].sheet;
-                            sh.img = imgBuild;
-                            sheetengine.dirty = 1;
-                            $scope.fbRef.build.push({xy: indexFromXY(clickpos.relyardx, clickpos.relyardy), user_id: $scope.authUser.user_id, type: game.objToInsert})
-                        } else if ($scope.authUser.money <= 0) {
-                            bootbox.alert("You need more money.");
-                        } else
-                            bootbox.alert("You can use bomb only on field with road.");
+                $scope.dragmousedowncity = function($event) {
+                    if (game.initialized) {
+                        var pxy = game.clickPosition($event.clientX, $event.clientY, sheetengine2);
+                        $scope.draganddropcity.mousePressed = true;
+                        $scope.draganddropcity.start = pxy;
                     }
                 };
-
-                $scope.newVehicle = function(name) {
-                    $scope.fbRef.newVehicle.push({name: name, xy: XYPlusIndex($scope.station.x, $scope.station.y, $scope.authUser.position), user_id: $scope.authUser.user_id});
+                $scope.dragdropcity = function($event) {
+                    if (game.initialized) {
+                        var pxy = game.clickPosition($event.clientX, $event.clientY, sheetengine2);
+                        if ($scope.draganddropcity.mousePressed) {
+                            $scope.draganddropcity.move = true;
+                            var self = game;
+                            var targetp = {
+                                x: self.cityCamera.x + ($scope.draganddropcity.start.x - pxy.x),
+                                y: self.cityCamera.y + ($scope.draganddropcity.start.y - pxy.y),
+                                z: 0};
+                            //console.log(($scope.draganddropcity.start.y - pxy.y));
+                            self.moveViewPointCity(targetp);
+                        }
+                    }
+                };
+                $scope.mouseUPcity = function($event) {
+                    $scope.draganddropcity.mousePressed = false;
+                    if ($scope.draganddropcity.move === false) {
+                        var pxy = game.clickPosition($event.clientX, $event.clientY, sheetengine2);
+                        var targetp = {
+                            x: (pxy.x / game.cityMapOpts.size),
+                            y: (pxy.y / game.cityMapOpts.size),
+                            z: 0};
+                        $scope.goToCity(targetp);
+                    }
+                    $scope.draganddropcity.move = false;
+                };
+                $scope.newVehicle = function(name, type) {
+                    fbRef.newVehicle.push().setWithPriority({name: name, type: type, xy: XYPlusIndex($scope.station.x, $scope.station.y, $scope.authUser.position), user_id: user_id}, Math.floor((Math.random() * 1000) + 1));
                     $scope.vehicle.selection = "default";
+                    $scope.vehicle.count++;
+                    $scope.vehicle.name = "Vehicle " + $scope.vehicle.count;
                 };
-                $scope.newPath = function(bus_id) {
+                $scope.newPath = function(vehicle_id, vehicle_type) {
                     $scope.vehicle.selection = "2";
-                    $scope.setBuilt("path");
-                    $scope.vehicle.bus_id = bus_id;
-
+                    $scope.setBuild("path");
+                    $scope.vehicle.vehicle_id = vehicle_id;
+                    $scope.vehicle.vehicle_type = vehicle_type;
                     $scope.path.message = "Which way should vehicle go?";
                     $scope.path.left = false;
                     $scope.path.right = false;
@@ -244,8 +287,7 @@ angular.module('myApp.controllers', [])
                          sh.img = imgDepo;*/
                         $scope.path.marks.push(markField(index));
                         sheetengine.dirty = 1;
-                    }
-                    else {
+                    } else {
                         $scope.path.message = "Find warehouse - starting point.";
                         $scope.path.left = false;
                         $scope.path.right = false;
@@ -277,9 +319,6 @@ angular.module('myApp.controllers', [])
                         posun.y = 1;
                     }
                     if (direction === 'back') {
-
-                    }
-                    if (direction === 'back') {
                         var x = $scope.path.marks.pop();
                         if (x !== undefined) {
                             x.destroy();
@@ -301,10 +340,8 @@ angular.module('myApp.controllers', [])
                             $scope.path.back = true;
                     } else {
                         $scope.path.back = false;
-
                         var lastIndex = $scope.path.position;
                         var index = XYPlusIndex(posun.x, posun.y, $scope.path.position);
-
                         console.debug(index);
                         while (existField(game, index) && isRoad(game, index)) {
                             console.debug(game.firebaseMap.map[index]);
@@ -315,7 +352,6 @@ angular.module('myApp.controllers', [])
                             $scope.path.marks.push(markField(index));
                             sheetengine.dirty = 1;
                             $scope.path.stops.push(index);
-
                             lastIndex = index;
                             index = XYPlusIndex(posun.x, posun.y, index);
                             console.debug(index);
@@ -325,71 +361,70 @@ angular.module('myApp.controllers', [])
                         $scope.path.right = true;
                         $scope.path.up = true;
                         $scope.path.down = true;
-
-
                         if (existField(game, index)) {
                             if (isCrossRoad(game, index)) {
                                 $scope.path.position = index;
-
                                 $scope.path.marks.push(markField(index));
                                 sheetengine.dirty = 1;
                                 $scope.path.stops.push(index);
-
                                 $scope.path.message = "Which way should vehicle go now?";
-
                                 console.debug(index);
                                 var indexL = XYPlusIndex(-1, 0, index);
-                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === 'A' || game.firebaseMap.map[indexL].type === 'A3' || game.firebaseMap.map[indexL].type === 'BF')) {
+                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === MapTypes.road.left || game.firebaseMap.map[indexL].type === MapTypes.road.cross || isStation(game, indexL))) {
                                     $scope.path.left = false;
                                 }
                                 else if (game.firebaseMap.map[indexL] === undefined)
                                     $scope.path.left = false;
                                 indexL = XYPlusIndex(1, 0, index);
-                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === 'A' || game.firebaseMap.map[indexL].type === 'A3' || game.firebaseMap.map[indexL].type === 'BF')) {
+                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === MapTypes.road.left || game.firebaseMap.map[indexL].type === MapTypes.road.cross || isStation(game, indexL))) {
                                     $scope.path.right = false;
                                 }
                                 else if (game.firebaseMap.map[indexL] === undefined)
                                     $scope.path.right = false;
                                 indexL = XYPlusIndex(0, -1, index);
-                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === 'A2' || game.firebaseMap.map[indexL].type === 'A3' || game.firebaseMap.map[indexL].type === 'BF')) {
+                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === MapTypes.road.right || game.firebaseMap.map[indexL].type === MapTypes.road.cross || isStation(game, indexL))) {
                                     $scope.path.up = false;
                                 }
                                 else if (game.firebaseMap.map[indexL] === undefined)
                                     $scope.path.up = false;
                                 indexL = XYPlusIndex(0, 1, index);
-                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === 'A2' || game.firebaseMap.map[indexL].type === 'A3' || game.firebaseMap.map[indexL].type === 'BF')) {
+                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === MapTypes.road.right || game.firebaseMap.map[indexL].type === MapTypes.road.cross || isStation(game, indexL))) {
                                     $scope.path.down = false;
                                 }
                                 else if (game.firebaseMap.map[indexL] === undefined)
                                     $scope.path.down = false;
                             }
-                            else if (game.firebaseMap.map[index].type === 'BF') {
-                                $scope.path.stops.push(index);
-                                console.debug($scope.path.stops);
-                                $scope.stops.name = "Farma";
+                            else if (isStation(game, index)) {
+                                if (VehNum[game.firebaseMap.map[index].type] === $scope.vehicle.vehicle_type) {
+                                    $scope.path.stops.push(index);
+                                    console.debug($scope.path.stops);
+                                    $scope.stops.name = FieldName[game.firebaseMap.map[index].type];
+                                } else
+                                    $scope.path.message = "Wrong vehicle type!";
+
                             }
                             else {
                                 $scope.path.message = "There is no road!";
                                 var indexL = XYPlusIndex(-1, 0, lastIndex);
-                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === 'A' || game.firebaseMap.map[indexL].type === 'A3')) {
+                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === MapTypes.road.left || game.firebaseMap.map[indexL].type === MapTypes.road.cross)) {
                                     $scope.path.left = false;
                                 }
                                 else if (game.firebaseMap.map[indexL] === undefined)
                                     $scope.path.left = false;
                                 indexL = XYPlusIndex(1, 0, lastIndex);
-                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === 'A' || game.firebaseMap.map[indexL].type === 'A3')) {
+                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === MapTypes.road.left || game.firebaseMap.map[indexL].type === MapTypes.road.cross)) {
                                     $scope.path.right = false;
                                 }
                                 else if (game.firebaseMap.map[indexL] === undefined)
                                     $scope.path.right = false;
                                 indexL = XYPlusIndex(0, -1, lastIndex);
-                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === 'A2' || game.firebaseMap.map[indexL].type === 'A3')) {
+                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === MapTypes.road.right || game.firebaseMap.map[indexL].type === MapTypes.road.cross)) {
                                     $scope.path.up = false;
                                 }
                                 else if (game.firebaseMap.map[indexL] === undefined)
                                     $scope.path.up = false;
                                 indexL = XYPlusIndex(0, 1, lastIndex);
-                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === 'A2' || game.firebaseMap.map[indexL].type === 'A3')) {
+                                if (lastIndex !== indexL && existField(game, indexL) && (game.firebaseMap.map[indexL].type === MapTypes.road.right || game.firebaseMap.map[indexL].type === MapTypes.road.cross)) {
                                     $scope.path.down = false;
                                 }
                                 else if (game.firebaseMap.map[indexL] === undefined)
@@ -415,27 +450,19 @@ angular.module('myApp.controllers', [])
                     }
                     console.debug($scope.path.stops);
                 };
-                $scope.setPath = function(userBus) {
+                $scope.setPath = function() {
                     var stops = $scope.path.stops;
-                    $scope.fbRef.pathVehicle.push({stops: stops, bus_id: $scope.vehicle.bus_id});
-
+                    fbRef.pathVehicle.push().setWithPriority({stops: stops, vehicle_id: $scope.vehicle.vehicle_id}, Math.floor((Math.random() * 1000) + 1));
                     $scope.cancelPath();
                 };
                 $scope.sellVehicle = function() {
-                    $scope.fbRef.sellVehicle.push({bus_id: $scope.vehicle.bus_id, user_id: $scope.authUser.user_id});
+                    fbRef.sellVehicle.push().setWithPriority({vehicle_id: $scope.vehicle.vehicle_id, user_id: user_id}, Math.floor((Math.random() * 1000) + 1));
                     $scope.cancelPath();
                 };
-                $scope.setBuilt = function(built) {
-                    $scope.built = built;
-                    game.objToInsert = built;
+                $scope.setBuild = function(build) {
+                    $scope.build = build;
+                    game.objToInsert = build;
                 };
-                $scope.changeFunction($scope.auth.user.uid);
-                $scope.built = '';
-                $scope.stops = {};
-                $scope.path = {};
-                $scope.vehicle = {selection: "default", name: "myVehicle"};
-                $scope.draganddrop = {mousePressed: false, start: {x: 0, y: 0}};
-
             }])
 
         .controller('LoginCtrl', ['$scope', 'loginService', '$location', function($scope, loginService, $location) {
@@ -443,16 +470,13 @@ angular.module('myApp.controllers', [])
                 $scope.pass = null;
                 $scope.confirm = null;
                 $scope.createMode = false;
-
                 $scope.login = function(cb) {
                     $scope.err = null;
                     if (!$scope.email) {
                         $scope.err = 'Please enter an email address';
-                    }
-                    else if (!$scope.pass) {
+                    } else if (!$scope.pass) {
                         $scope.err = 'Please enter a password';
-                    }
-                    else {
+                    } else {
                         loginService.login($scope.email, $scope.pass, function(err, user) {
                             $scope.err = err ? err + '' : null;
                             if (!err) {
@@ -466,83 +490,84 @@ angular.module('myApp.controllers', [])
                 $scope.email = null;
                 $scope.pass = null;
                 $scope.confirm = null;
+                $scope.city = null;
                 $scope.createMode = true;
-
+                $scope.err = null;
                 $scope.login = function(cb) {
                     $scope.err = null;
                     if (!$scope.email) {
                         $scope.err = 'Please enter an email address';
-                    }
-                    else if (!$scope.pass) {
+                        bootbox.alert($scope.err);
+                    } else if (!$scope.pass) {
                         $scope.err = 'Please enter a password';
-                    }
-                    else {
+                        bootbox.alert($scope.err);
+                    } else {
                         loginService.login($scope.email, $scope.pass, function(err, user) {
                             $scope.err = err ? err + '' : null;
                             if (!err) {
                                 cb && cb(user);
+                            } else {
+                                bootbox.alert($scope.err);
                             }
                         });
                     }
                 };
-
                 $scope.createAccount = function() {
                     $scope.err = null;
                     if (assertValidLoginAttempt()) {
                         loginService.createAccount($scope.email, $scope.pass, function(err, user) {
                             if (err) {
                                 $scope.err = err ? err + '' : null;
+                                bootbox.alert($scope.err);
                             }
                             else {
                                 // must be logged in before I can write to my profile
                                 $scope.login(function() {
-                                    loginService.createProfile(user.uid, user.email);
+                                    loginService.createProfile(user.uid, user.email, $scope.city);
                                     $location.path('/');
                                 });
                             }
                         });
                     }
                 };
-
                 function assertValidLoginAttempt() {
                     if (!$scope.email) {
                         $scope.err = 'Please enter an email address';
-                    }
-                    else if (!$scope.pass) {
+                        bootbox.alert($scope.err);
+                    } else if (!$scope.pass) {
                         $scope.err = 'Please enter a password';
-                    }
-                    else if ($scope.pass !== $scope.confirm) {
+                        bootbox.alert($scope.err);
+                    } else if ($scope.pass !== $scope.confirm) {
                         $scope.err = 'Passwords do not match';
+                        bootbox.alert($scope.err);
+                    } else if (!$scope.city || $scope.city.length > 50 || $scope.city.length < 4) {
+                        $scope.err = 'Please enter a city name (min 3  and max 50 characters)';
+                        bootbox.alert($scope.err);
                     }
                     return !$scope.err;
                 }
             }])
         .controller('AccountCtrl', ['$scope', 'loginService', 'syncData', '$location', function($scope, loginService, syncData, $location) {
                 syncData(['users', $scope.auth.user.uid]).$bind($scope, 'user');
-
-                $scope.fbRef = {
+                var fbRef = {
                     changeColor: new Firebase(FbRef.refQ + 'changeColor'),
                 };
-
                 $scope.changeColor = function() {
                     var color = $('#color').val();
-                    $scope.fbRef.changeColor.push({color: color, user_id: $scope.auth.user.uid});
+                    fbRef.changeColor.push().setWithPriority({color: color, user_id: $scope.auth.user.uid}, Math.floor((Math.random() * 1000) + 1));
+                    bootbox.alert("Color was changed.");
                 };
-
                 $scope.oldpass = null;
                 $scope.newpass = null;
                 $scope.confirm = null;
-
                 $scope.reset = function() {
                     $scope.err = null;
                     $scope.msg = null;
                 };
-
                 $scope.updatePassword = function() {
                     $scope.reset();
                     loginService.changePassword(buildPwdParms());
                 };
-
                 function buildPwdParms() {
                     return {
                         email: $scope.auth.user.email,

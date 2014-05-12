@@ -27,7 +27,7 @@ var helpsheetengine = function() {
 
         viewSource: {x: -1, y: -1, z: -Math.SQRT1_2},
         tempCanvasSize: {w: 115, h: 115}, // 115x115: max extent of a 80x80 sheet. the size of the temp canvas used when background is redrawn
-        backgroundColor: '#FFF',
+        backgroundColor: '#6C843B',
         drawObjectContour: false,
         boundingBoxMaxsheetDistance: 150,
         objectsintersect: false,
@@ -1203,7 +1203,7 @@ var helpsheetengine = function() {
             if (polygon2.sheetindex == polygon.sheetindex)
                 continue;
 
-            if (sheetengine.sheets[polygon2.sheetindex].hidden || sheetengine.sheets[polygon.sheetindex].hidden)
+            if (sheetengine.sheets[polygon2.sheetindex] === undefined || sheetengine.sheets[polygon2.sheetindex].hidden || sheetengine.sheets[polygon.sheetindex] === undefined || sheetengine.sheets[polygon.sheetindex].hidden)
                 continue;
 
             addPolygonConstraintForCam(polygon, polygon2, shadow);
@@ -1259,7 +1259,7 @@ var helpsheetengine = function() {
         //var ordered = [];
         var unordered = [];
         for (var i = 0; i < sheetengine.polygons.length; i++) {
-            if (sheetengine.sheets[sheetengine.polygons[i].sheetindex].hidden)
+            if (sheetengine.sheets[sheetengine.polygons[i].sheetindex] === undefined || sheetengine.sheets[sheetengine.polygons[i].sheetindex].hidden)
                 continue;
             unordered.push(i);
         }
@@ -1598,7 +1598,7 @@ var helpsheetengine = function() {
             for (var k = 0; k < firstDirtyPolygon; k++) {
                 var staticPoly = sheetengine.polygons[k];
                 var staticSheet = sheetengine.sheets[staticPoly.sheetindex];
-                if (staticSheet.hidden)
+                if (staticSheet === undefined || staticSheet.hidden)
                     continue;
                 addPolygonConstraint(staticPoly, dirtyPoly);
             }
@@ -1815,7 +1815,7 @@ var helpsheetengine = function() {
         for (var p = 0; p < sheetengine.polygons.length; p++) {
             var poly = sheetengine.polygons[p];
             var psheet = sheetengine.sheets[poly.sheetindex];
-            if (!psheet.deleting)
+            if (psheet !== undefined && !psheet.deleting)
                 newpolys.push(poly);
             else
                 deletedpolyidxs.push(p);

@@ -1,25 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.brno.candg.ttdmmo.backend.firebase.listeners;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-import cz.brno.candg.ttdmmo.firebase.FbMapReq;
+import com.firebase.client.ValueEventListener;
+import cz.brno.candg.ttdmmo.dto.MapFieldDTO;
 import cz.brno.candg.ttdmmo.model.MapField;
 import cz.brno.candg.ttdmmo.serviceapi.MapFieldService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Data to map service for method build
  *
  * @author lastuvka
  */
-public class DataToMapFieldServiceListener extends ValueEventListenerWithType {
+public class DataToMapFieldServiceListener implements ValueEventListener {
 
+    final static Logger log = LoggerFactory.getLogger(DataToMapFieldServiceListener.class);
     private int money = -1;
     private MapField mapField = null;
-    private FbMapReq fbReq;
+    private MapFieldDTO fbReq;
     private MapFieldService mapFieldService;
 
     public MapFieldService getMapFieldService() {
@@ -30,11 +30,11 @@ public class DataToMapFieldServiceListener extends ValueEventListenerWithType {
         this.mapFieldService = mapFieldService;
     }
 
-    public FbMapReq getFbReq() {
+    public MapFieldDTO getFbReq() {
         return fbReq;
     }
 
-    public void setFbReq(FbMapReq fbReq) {
+    public void setFbReq(MapFieldDTO fbReq) {
         this.fbReq = fbReq;
     }
 
@@ -56,15 +56,15 @@ public class DataToMapFieldServiceListener extends ValueEventListenerWithType {
 
     @Override
     public void onDataChange(DataSnapshot ds) {
-        System.out.println(ds.getValue() + " name> " + ds.getName() + " a type/");
         if (ds.getName().equals("money")) {
+            log.info("Additional data recived: user money - " + ds.getValue());
             setMoney(ds.getValue(Integer.class));
         } else {
+            log.info("Additional data recived: map field - " + ds.getValue());
             setMapField(ds.getValue(MapField.class));
         }
 
         if (getMoney() != -1 && getMapField() != null) {
-            System.out.println("req to service" + fbReq.toString());
             mapFieldService.build(getMoney(), getMapField(), getFbReq());
         }
     }

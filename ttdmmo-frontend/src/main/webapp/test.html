@@ -1,0 +1,307 @@
+
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="Zdenek Lastuvka">
+        <title>MMOTTD</title>
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+        <link href="css/app.css" rel="stylesheet">
+        <link href="css/animation.css" rel="stylesheet">
+        <link rel="stylesheet" href="jscolor/farbtastic.css" type="text/css" />
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+    </head>
+
+    <body ng-cloak-auth class="hide" ng-controller="myUnlogCntrl" >
+
+        <div  class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">MMOTTD</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li ng-class="'/home' | isActive" ng-show-auth="logout,error"><a href="#/home">Home</a></li>
+                        <li ng-class="'/map' | isActive" ng-show-auth="login" ><a href="#/map">Map</a></li>
+                        <li ng-class="'/contact' | isActive" ng-show-auth="logout,error"><a href="#/contact">Contact</a></li>
+                    </ul>
+                    <form ng-show-auth="logout,error" class="navbar-form navbar-right" role="form">
+                        <div class="form-group">
+                            <input type="text" placeholder="Email" ng-model="email" class="form-control" required autofocus>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" placeholder="Password" ng-model="pass" class="form-control" required>
+                        </div>
+                        <button type="submit" ng-click="login()" class="btn btn-success">Sign in</button>
+                        <a class="btn btn-danger" href="#/register" role="button">Create Account &raquo;</a>
+                    </form>
+                    <ul ng-show-auth="login" ng-controller="myLogCntrl" class="nav ng-cloak navbar-nav pull-right"> 
+                        <li class="dropdown">
+                            <a href="" class="dropdown-toggle" data-toggle="dropdown">{{auth.user.email}} <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#/account">Profile</a></li>
+                                <li><a href="" ng-click="logout()">Log out</a></li>
+                            </ul></li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
+        <div class="fixcontainer">
+            <!-- Main jumbotron for a primary marketing message or call to action -->
+
+
+
+
+            <div style="float:right"> 
+                <div class="panel panel-primary">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Profile</div>
+                    <div class="panel-body">
+                        <p>Username: {{authUser.name}}</p>
+                        <p>Money: {{authUser.money}} €</p>
+                        <p>City: {{city.name}} ({{city.people}})</p>
+                        <p>Food: 
+                        <progressbar class="progress-striped active" max="100" value="city.food*50/city.people" style="width: 300px;">
+                            <span style="display: block;text-align: center;width: 300px;color:black; white-space:nowrap;">{{city.food}} / {{city.people * 2}}</span>
+                        </progressbar></p>
+                        <p>Wood: 
+                        <progressbar class="progress-striped active" max="100" value="city.wood*50/city.people" style="width: 300px;">
+                            <span style="display: block;text-align: center;width: 300px;color:black; white-space:nowrap;">{{city.wood}} / {{city.people * 2}}</span>
+                        </progressbar></p>
+                    </div>
+
+
+                </div>
+                <div class="panel panel-primary">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Build {{build}}</div>
+                    <div class="btn-toolbar" role="toolbar">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default" ng-click="setBuild('RDL')" > <img src="images/built/imgRoad.jpg"  /> </button>
+                            <button type="button" class="btn btn-default"  ng-click="setBuild('RDR')" > <img src="images/built/imgRoad2.jpg" /> </button>
+                            <button type="button" class="btn btn-default" ng-click="setBuild('RC')" > <img src="images/built/imgCross.jpg"  /> </button>
+
+                            <button type="button" class="btn btn-default" ng-click="setBuild('N')" > <img src="images/built/imgBomb.jpg"  /> </button>
+                            <button type="button" class="btn btn-default" ng-click="setBuild('')" > <img src="images/built/imgHand.jpg"  /> </button>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!--angular-->
+                <div class="panel panel-primary">                               
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Vehicles</div>
+                    <div class="animate-switch-container"
+                         ng-switch on="vehicle.selection">
+                        <div class="animate-switch" ng-switch-when="1">
+                            <form name="myForm">
+                                <div class="control-group" ng-class="{error: myForm.name.$invalid}">
+                                    <label>Type</label>
+
+                                    <select ng-model="vehicle.type" ng-options="type.id as type.name for type in vehicleTypes"></select><br>
+                                    <label>Name</label>
+                                    <input type="text" name="name" ng-maxlength="50" ng-model="vehicle.name" required>
+                                    <span ng-show="myForm.name.$error.required" class="help-inline">
+                                        Required</span>
+                                    <span ng-show="myForm.name.$error.maxlength" class="help-inline">
+                                        Too long!</span>
+
+                                </div>
+                                <button ng-click="vehicle.selection = 0" type="button" class="btn btn-default">
+                                    Cancel
+                                </button>
+
+                                <button ng-click="newVehicle(vehicle.name, vehicle.type)" ng-disabled="myForm.$invalid"
+                                        class="btn btn-primary">Save</button>
+                            </form>
+                        </div>
+                        <div class="animate-switch" ng-switch-when="2">           
+                            <form name="changeVehicleForm">
+                                <div style="text-align:center;">
+                                    {{path.message}}<br>
+                                    <button ng-click="setPathDirection('up')" ng-disabled="path.up"
+                                            class="btn btn-primary"><img src="images/arrow/up.png"  /></button>
+                                    <br>
+                                    <button ng-click="setPathDirection('left')" ng-disabled="path.left"
+                                            class="btn btn-primary"><img src="images/arrow/left.png"  /></button>
+                                    <button ng-click="setPathDirection('back')" ng-disabled="path.back"
+                                            class="btn btn-primary">BACK</button>
+                                    <button ng-click="setPathDirection('right')" ng-disabled="path.right"
+                                            class="btn btn-primary"><img src="images/arrow/right.png"  /></button>
+                                    <br>
+                                    <button ng-click="setPathDirection('down')" ng-disabled="path.down"
+                                            class="btn btn-primary"><img src="images/arrow/down.png"  /></button>
+                                    <br>
+                                </div>
+                                <div class="control-group" ng-hide="changeVehicleForm.name.$error.required" ng-class="{error: changeVehicleForm.name.$invalid}">
+                                    <label>Stop</label>
+                                    <input type="text" name="name" readonly ng-model="stops.name" required>
+                                    <span ng-show="changeVehicleForm.name.$error.required" class="help-inline">
+                                        Required</span>
+                                    <button ng-click="setPath(stops.name)" ng-disabled="changeVehicleForm.$invalid"
+                                            class="btn btn-primary">Save</button>
+                                </div>
+                                <hr>
+                                <button ng-click="cancelPath()" type="button" class="btn btn-default">
+                                    Cancel
+                                </button>
+
+                                <button ng-click="sellVehicle()" 
+                                        class="btn btn-warning">Sell</button>
+                            </form>
+                        </div>
+                        <div class="animate-switch" ng-switch-default>
+                            <!-- Table -->
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>name</th>
+                                        <th>path time</th>
+                                        <th>cargo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="(id,userBus) in userBuses">
+                                        <td>{{userBus.name}}</td>
+
+                                        <td ng-if="userBus.p_size > 0">{{userBus.p_size * userBus.speed / 1000}}s</td>
+                                        <td ng-if="userBus.p_size == 0">DEPO</td>
+                                        <td>{{userBus.cargo}}</td>
+                                        <td>
+                                            <a href="" ng-click="newPath(userBus.vehicle_id, userBus.type)">Change</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="panel-body">
+                                <!-- Button trigger modal -->
+                                <button ng-click="vehicle.selection = 1" type="button" class="btn btn-primary">
+                                    New vehicle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-primary">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Cities</div>
+
+                    <!-- Table -->
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>People</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="(id,city) in rank | orderByPriority | reverse">              
+                                <td>{{id + 1}}.</td>
+                                <td>{{city.name}}</td>
+                                <td>{{city.$priority}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <div style="background-color: black;width: 806px;padding: 3px 10px 3px 10px">
+                <a href="" ng-click="goToCity()">Go to my city</a> | 
+                <a href="" ng-hide="showCityMap" ng-click="showCityMap = true">Show global map</a>  
+                <a href="" ng-show="showCityMap" ng-click="showCityMap = false">Hide global map</a> | Zoom + - 
+            </div>
+            <canvas id="cityCanvas" ng-show="showCityMap" ng-mousemove="dragdropcity($event)" 
+                    ng-mousedown="dragmousedowncity($event)" ng-mouseup="mouseUPcity($event)" 
+                    width="400" height="300" style="background-color: black;cursor:pointer;border: 3px solid black;">
+                <div style="margin-top:140px;text-align:center;">Your browser does not support HTML 5.</div>
+            </canvas>
+            <canvas id="mainCanvas"  ng-mousemove="dragdrop($event)" 
+                    ng-mousedown="dragmousedown($event)" ng-mouseup="mouseUP($event)" 
+                    width="800" height="600" style="cursor:pointer;border: 3px solid black;background-color:#6C843B;">
+                <div style="margin-top:140px;text-align:center;">Your browser does not support HTML 5.</div>
+            </canvas>
+            <div style="z-index: 1;width:100%;height:100%;border:0px solid red;position:absolute;top:0 ">   
+                <div style="border:0px solid #1d81f7;width:100px;top:350px;left:820px;position:relative">
+                    <div style="margin-left: 40px;border:2px solid #1d81f7;width:50px;height:50px;float:right"></div>
+                    <img src="images/arrow/rt.png" style="width:50px"> 
+
+                </div>      
+                <div style="border:5px solid #1d81f7;width:400px;top:120px;left:220px;position:relative">
+                    <div style="border:3px solid black;background-color: black;">
+                        <img src="images/ralf/ralfmini.png" style="border-right:3px solid black;background-color: black;float: left"> 
+                        <div style="margin-left: 100px;height:133px;padding: 20px;background-color: white;">
+                            <!--  Hi! My name is Ralf and I will help you with start in this game!<br>
+                              <button style="float: right" ng-click="newVehicle(vehicle.name, vehicle.type)" 
+                                      class="btn btn-primary">Next</button>-->
+                            Now I will teach you how to build roads. Start with click on right road.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+
+        <!--angular-->
+
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+        <script src="js/bootbox.min.js"></script>
+        <script type="text/javascript" src="jscolor/farbtastic.js"></script>
+
+
+        <script src="./js/constants.js"></script>   
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="https://cdn.firebase.com/v0/firebase.js"></script>
+        <script src="https://cdn.firebase.com/libs/firebase-util/0.1.0/firebase-util.min.js"></script>
+        <script src="https://cdn.firebase.com/v0/firebase-simple-login.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-route.js"></script>
+        <script src="https://cdn.firebase.com/libs/angularfire/0.6.0/angularfire.js"></script>
+        <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.10.0.js"></script>
+
+        <script src="./js/sheetengine.js"></script>    
+        <script src='./js/Building.js'></script>
+        <script src='./js/Vehicle.js'></script>
+        <script src='./js/FirebaseMap.js'></script> 
+        <script src='./js/CityMap.js'></script>
+        <script src="./js/game.js"></script>
+
+        <script src="js/app.js"></script>
+        <script src="js/config.js"></script>
+        <script src="js/controllers.js"></script>
+        <script src="js/directives.js"></script>
+        <script src="js/filters.js"></script>
+        <script src="js/routes.js"></script>
+        <script src="js/services.js"></script>
+        <script src="js/service.login.js"></script>
+        <script src="js/service.firebase.js"></script>
+        <script src="js/module.waitForAuth.js"></script>
+        <script src="js/module.routeSecurity.js"></script>
+    </body>
+</html>
+

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This entity represents registered, logged and authenticated user.
+ * This entity represents user.
  *
  * @author Lastuvka
  */
@@ -16,7 +16,7 @@ public class AuthUser {
     private String user_id;
     private String position;
     private String color;
-    private Map<String, Boolean> buses = new HashMap<String, Boolean>();
+    private Map<String, Boolean> vehicles = new HashMap<String, Boolean>();
 
     public AuthUser() {
     }
@@ -41,12 +41,16 @@ public class AuthUser {
         return email;
     }
 
-    public Map<String, Boolean> getBuses() {
-        return buses;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public void setBuses(Map<String, Boolean> buses) {
-        this.buses = buses;
+    public Map<String, Boolean> getVehicles() {
+        return vehicles;
+    }
+
+    public void setVehicles(Map<String, Boolean> vehicles) {
+        this.vehicles = vehicles;
     }
 
     public int getMoney() {
@@ -75,7 +79,7 @@ public class AuthUser {
 
     @Override
     public String toString() {
-        return "AuthUser{" + "money=" + money + ", name=" + name + ", user_id=" + user_id + '}';
+        return "AuthUser{" + "money=" + money + ", name=" + name + ", email=" + email + ", user_id=" + user_id + ", position=" + position + ", color=" + color + ", buses=" + vehicles + '}';
     }
 
 }

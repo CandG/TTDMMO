@@ -17,7 +17,22 @@
         <div class="col-md-4">
             <h2>Best cities</h2>
             <p>The most power cities are:</p>
-            1. Brno
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>People</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="(id,city) in rank | orderByPriority | reverse">              
+                        <td>{{id + 1}}.</td>
+                        <td>{{city.name}} ({{city.xy}})</td>
+                        <td>{{city.$priority}}</td>
+                    </tr>
+                </tbody>
+            </table>
 
         </div>
         <div class="col-md-4">

@@ -1,24 +1,38 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.brno.candg.ttdmmo.backend.dao;
 
-import cz.brno.candg.ttdmmo.backend.firebase.listeners.ValueEventListenerWithType;
+import com.firebase.client.ValueEventListener;
 import cz.brno.candg.ttdmmo.model.MapField;
 
 /**
+ * DAO interface for Map Field
  *
  * @author Zdenek Lastuvka
  */
 public interface MapFieldDao extends Dao<MapField> {
 
-    void getByXY(int x, int y, ValueEventListenerWithType valueEventListener);
+    /**
+     * Get field by coord x,y
+     *
+     * @param x
+     * @param y
+     * @param valueEventListener
+     */
+    void getByXY(int x, int y, ValueEventListener valueEventListener);
 
-    void getByID(String id, ValueEventListenerWithType valueEventListener);
+    /**
+     * Remove path from map with id
+     *
+     * @param id
+     * @param path_id
+     */
+    void removePath(String id, String path_id);
 
-    void removeBus(int x, int y, String bus_id);
-
-    void addBus(int x, int y, String bus_id);
+    /**
+     * Add path for field on x,y
+     *
+     * @param x
+     * @param y
+     * @param path_id
+     */
+    void addPath(int x, int y, String path_id);
 }

@@ -1,20 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.brno.candg.ttdmmo.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This entity represents path.
  *
  * @author lastuvka
  */
 public class Path {
 
     private List<String> path = new ArrayList<String>();
+    private transient String id;
+
+    public String transientGetId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public List<String> getPath() {
         return path;
@@ -26,7 +31,7 @@ public class Path {
 
     @Override
     public String toString() {
-        return "Path{" + "path=" + path + '}';
+        return "Path{" + "path=" + path + ", id=" + id + '}';
     }
 
 }

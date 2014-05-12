@@ -1,29 +1,52 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.brno.candg.ttdmmo.serviceapi;
 
-import cz.brno.candg.ttdmmo.firebase.FbSellVehicleReq;
-import cz.brno.candg.ttdmmo.firebase.NewVehicleReq;
-import cz.brno.candg.ttdmmo.firebase.PathReq;
+import cz.brno.candg.ttdmmo.dto.NewVehicleDTO;
+import cz.brno.candg.ttdmmo.dto.PathDTO;
+import cz.brno.candg.ttdmmo.dto.SellVehicleDTO;
 import cz.brno.candg.ttdmmo.model.AuthUser;
-import cz.brno.candg.ttdmmo.model.Bus;
 import cz.brno.candg.ttdmmo.model.MapField;
+import cz.brno.candg.ttdmmo.model.Path;
+import cz.brno.candg.ttdmmo.model.Vehicle;
 import java.util.List;
 
 /**
+ * Vehicle service interface for operations on vehicles.
  *
  * @author lastuvka
  */
 public interface VehicleService {
 
-    public void move(MapField mapField, String nextMapField_id, Bus bus);
+    /**
+     * Move vehicle (change direction, in/out cargo)
+     *
+     * @param bus
+     */
+    public void move(Vehicle bus);
 
-    public void create(MapField mapField, AuthUser authUser, NewVehicleReq req);
+    /**
+     * Create new vehicle for user
+     *
+     * @param authUser
+     * @param req
+     */
+    public void create(AuthUser authUser, NewVehicleDTO req);
 
-    public void sell(AuthUser authUser, Bus bus, FbSellVehicleReq req);
+    /**
+     * Sell vehicle of user / delete vehicles path
+     *
+     * @param authUser
+     * @param path
+     * @param req
+     */
+    public void sell(AuthUser authUser, Path path, SellVehicleDTO req);
 
-    public void setPath(Bus bus, List<MapField> path, PathReq req);
+    /**
+     * Set path for vehicle
+     *
+     * @param vehicle
+     * @param oldPath
+     * @param path
+     * @param req
+     */
+    public void setPath(Vehicle vehicle, Path oldPath, List<MapField> path, PathDTO req);
 }

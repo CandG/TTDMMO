@@ -8,54 +8,72 @@
 
 </script>
 
-<h2>Account</h2>
+<div class="container">
+    <!-- Example row of columns -->
+    <div class="page-header">
+        <h1>Account</h1>
+    </div>
+    <form>
+        <div class="row">
+            <div class="col-md-4">
+                <fieldset>
+                    <legend>Profile</legend>
 
-<form>
-    <fieldset>
-        <legend>Profile</legend>
+                    <label>
+                        <span>Company name:</span>
+                        <input type="text" name="name" ng-model="user.name"/> (AUTOSAVE)
+                    </label>
+                </fieldset>
 
-        <label>
-            <span>Name:</span>
-            <input type="text" name="name" ng-model="user.name"/>
-        </label>
+            </div>
+            <div class="col-md-4">
+                <fieldset>
+                    <legend>Change color</legend>
+                    <div id="colorpicker"></div>
 
-        <!--  <label>
-              <span>Email:</span>
-              <input type="text" name="name" ng-model="user.email"/>
-          </label>-->
-    </fieldset>
-    <fieldset>
-        <legend>Change color</legend>
-        <div id="colorpicker"></div>
+                    <label>
+                        <span>Color:</span>
+                        <input type="text" id="color" name="color" value="#123456"  />
+                    </label>
+                    <button ng-click="changeColor()">update color</button>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <fieldset>
+                    <legend>Change Password</legend>
 
-        <label>
-            <span>Color:</span>
-            <input type="text" id="color" name="color" value="#123456"  />
-        </label>
-        <button ng-click="changeColor()">update color</button>
-    </fieldset>
+                    <label>
+                        <span>Old Password:</span>
+                        <input type="password" ng-keypress="reset()" ng-model="oldpass"/>
+                    </label>
 
-    <fieldset>
-        <legend>Change Password</legend>
+                    <label>
+                        <span>New Password:</span>
+                        <input type="password" ng-keypress="reset()" ng-model="newpass"/>
+                    </label>
 
-        <label>
-            <span>Old Password:</span>
-            <input type="password" ng-keypress="reset()" ng-model="oldpass"/>
-        </label>
+                    <label>
+                        <span>Confirm Password:</span>
+                        <input type="password" ng-keypress="reset()" ng-model="confirm"/>
+                    </label>
 
-        <label>
-            <span>New Password:</span>
-            <input type="password" ng-keypress="reset()" ng-model="newpass"/>
-        </label>
+                    <button ng-click="updatePassword()">update password</button>
 
-        <label>
-            <span>Confirm Password:</span>
-            <input type="password" ng-keypress="reset()" ng-model="confirm"/>
-        </label>
+                    <p class="error" ng-show="err">{{err}}</p>
+                    <p class="good" ng-show="msg">{{msg}}</p>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+    <hr>
 
-        <button ng-click="updatePassword()">update password</button>
+    <footer>
+        <p>&copy; TTDMMO 2014 v<span app-version></span></p>
+    </footer>
+</div> <!-- /container -->
 
-        <p class="error" ng-show="err">{{err}}</p>
-        <p class="good" ng-show="msg">{{msg}}</p>
-    </fieldset>
-</form>
+
+
+
+
+

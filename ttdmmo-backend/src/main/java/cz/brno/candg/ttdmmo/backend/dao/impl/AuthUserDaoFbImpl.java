@@ -6,8 +6,8 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.MutableData;
 import com.firebase.client.ServerValue;
 import com.firebase.client.Transaction;
+import com.firebase.client.ValueEventListener;
 import cz.brno.candg.ttdmmo.backend.dao.AuthUserDao;
-import cz.brno.candg.ttdmmo.backend.firebase.listeners.ValueEventListenerWithType;
 import cz.brno.candg.ttdmmo.constants.FbRef;
 import cz.brno.candg.ttdmmo.model.AuthUser;
 import org.slf4j.Logger;
@@ -22,31 +22,24 @@ public class AuthUserDaoFbImpl implements AuthUserDao {
 
     final static Logger log = LoggerFactory.getLogger(AuthUserDaoFbImpl.class);
 
-    private final Firebase ref = new Firebase(FbRef.ref + "users");
-
-    private static int cislo = 0;
-
-    // injected from Spring
-    public AuthUserDaoFbImpl() {
-        log.info("Inicializace AuthUserDaoFirebaseImpl" + cislo);
-        cislo++;
-    }
+    private final Firebase ref = new Firebase(FbRef.refD + "users");
 
     @Override
     public String create(AuthUser entity) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String id = entity.getUser_id();
+        ref.child(id).setValue(entity);
+        return id;
     }
 
     @Override
-    public void get(String id, ValueEventListenerWithType valueEventListener) {
+    public void get(String id, ValueEventListener valueEventListener) {
         Firebase childRef = ref.child(id);
         childRef.addListenerForSingleValueEvent(valueEventListener);
     }
 
     @Override
-    public void getMoney(String id, ValueEventListenerWithType valueEventListener) {
+    public void getMoney(String id, ValueEventListener valueEventListener) {
         Firebase childRef = ref.child(id).child("money");
-        valueEventListener.setType("money");
         childRef.addListenerForSingleValueEvent(valueEventListener);
     }
 
@@ -58,37 +51,47 @@ public class AuthUserDaoFbImpl implements AuthUserDao {
 
     @Override
     public void remove(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Firebase childRef = ref.child(id);
+        childRef.removeValue();
     }
 
     @Override
-    public void setMoney(String id, final int money) {
-        //ref.child(id).child("money").setValue(Long.toString(money));
+    public void updateMoney(String id, final int money) {
         Firebase childRef = ref.child(id).child("money");
         childRef.runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData currentData) {
-                int count = currentData.getValue(Integer.class);
-                currentData.setValue(count + money);
+                if (currentData.getValue() != null) {
+                    int count = currentData.getValue(Integer.class);
+                    currentData.setValue(count + money);
+                }
                 return Transaction.success(currentData);
             }
 
             @Override
             public void onComplete(FirebaseError error, boolean committed, DataSnapshot currentData) {
-
+                if (error != null) {
+                    System.err.println("There was there an error for update money: " + error.getMessage());
+                } else {
+                    if (!committed) {
+                        System.err.println("Transaction for update money did not commit!");
+                    } else {
+                        System.out.println("Transaction for update money succeeded!");
+                    }
+                }
             }
         });
     }
 
     @Override
-    public void addBus(String id, String bus_id) {
-        Firebase childRef = ref.child(id).child("buses").child(bus_id);
+    public void addVehicle(String id, String vehicle_id) {
+        Firebase childRef = ref.child(id).child("vehicles").child(vehicle_id);
         childRef.setValue(true);
     }
 
     @Override
-    public void removeBus(String id, String bus_id) {
-        Firebase childRef = ref.child(id).child("buses").child(bus_id);
+    public void removeVehicle(String id, String vehicle_id) {
+        Firebase childRef = ref.child(id).child("vehicles").child(vehicle_id);
         childRef.removeValue();
     }
 
